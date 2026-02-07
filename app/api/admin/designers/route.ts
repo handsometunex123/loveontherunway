@@ -1,21 +1,32 @@
+import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const { email, ...designerData } = body;
+    const { email, password, ...designerData } = body;
+
+    if (!email || !password) {
+      return NextResponse.json(
+        { error: "Email and password are required" },
+        { status: 400 }
+      );
+    }
 
     await db.$transaction([
       db.user.create({
         data: {
           id: designerData.id,
           email,
-          // Add other required fields for the user model
+          password,
+          role: "DESIGNER",
         },
       }),
       db.designerProfile.create({
         data: {
           ...designerData,
-          userId: designerData.id, // Ensure userId matches the created user
+          userId: designerData.id,
         },
       }),
     ]);
