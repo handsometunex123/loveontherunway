@@ -5,15 +5,21 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
-let db: PrismaClient;
+let db: PrismaClient | null = null;
 
-if (process.env.NODE_ENV === "production") {
+function initializeDb(): PrismaClient {
+  if (db) return db;
+
   db = new PrismaClient();
-} else {
-  if (!global.prisma) {
-    global.prisma = new PrismaClient();
-  }
-  db = global.prisma;
+  return db;
 }
 
-export { db };
+// Lazy initialize only when actually needed (at runtime, not build time)
+const dbProxy = new Proxy({} as PrismaClient, {
+  get: (target, prop) => {
+    const client = initializeDb();
+    return (client as any)[prop];
+  }
+});
+
+export { dbProxy as db };
