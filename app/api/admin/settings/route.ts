@@ -4,6 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { settingsSchema } from "@/lib/validation";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const settings = await db.platformSetting.findFirst();
   return NextResponse.json(settings);

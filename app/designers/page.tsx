@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import DesignerProductCarousel from "./DesignerProductCarousel";
 import BackButton from "../BackButton";
 
+export const dynamic = "force-dynamic";
+
 export default async function DesignersPage() {
   const designers = await db.designerProfile.findMany({
     where: {
