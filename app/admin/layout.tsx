@@ -11,14 +11,17 @@ export default async function AdminLayout({
   const isSuperAdmin = session.user.role === "SUPER_ADMIN";
   
   let displayName = session.user.name || session.user.email || "User";
+  let designerLogo: string | null = null;
   
-  // If user is a designer, use their brand name
+  // If user is a designer, use their brand name and logo
   if (session.user.role === "DESIGNER") {
     const designerProfile = await db.designerProfile.findUnique({
-      where: { userId: session.user.id }
+      where: { userId: session.user.id },
+      select: { brandName: true, brandLogo: true }
     });
     if (designerProfile?.brandName) {
       displayName = designerProfile.brandName;
+      designerLogo = designerProfile.brandLogo;
     }
   }
   
@@ -30,9 +33,17 @@ export default async function AdminLayout({
       <div className="rounded-2xl md:rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900 to-purple-900 p-4 md:p-6 border border-purple-800/30">
         {/* Mobile Version */}
         <div className="md:hidden flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-            {displayName.charAt(0).toUpperCase()}
-          </div>
+          {designerLogo ? (
+            <img
+              src={designerLogo}
+              alt={`${displayName} logo`}
+              className="h-10 w-10 rounded-full object-cover border-2 border-purple-300 flex-shrink-0"
+            />
+          ) : (
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+              {displayName.charAt(0).toUpperCase()}
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-white truncate">{displayName}</p>
             <p className="text-xs text-purple-200 truncate">{roleLabel}</p>
@@ -49,9 +60,17 @@ export default async function AdminLayout({
 
           <div className="rounded-xl bg-white/5 px-4 py-3 border border-white/10">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white font-bold flex-shrink-0">
-                {displayName.charAt(0).toUpperCase()}
-              </div>
+              {designerLogo ? (
+                <img
+                  src={designerLogo}
+                  alt={`${displayName} logo`}
+                  className="h-10 w-10 rounded-full object-cover border-2 border-purple-300 flex-shrink-0"
+                />
+              ) : (
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white font-bold flex-shrink-0">
+                  {displayName.charAt(0).toUpperCase()}
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-white truncate">{displayName}</p>
                 <p className="text-xs text-purple-200 truncate">{email}</p>

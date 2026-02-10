@@ -10,6 +10,8 @@ export default async function DashboardPage() {
   let orderCount = 0;
   let voteCount = 0;
   let designerCount = 0;
+  let designerLogo: string | null = null;
+  let designerBrandName: string | null = null;
 
   if (isSuperAdmin) {
     // Super admin sees all data
@@ -22,8 +24,14 @@ export default async function DashboardPage() {
   } else {
     // Designer sees only their own data
     const designerProfile = await db.designerProfile.findUnique({
-      where: { userId: session.user.id }
+      where: { userId: session.user.id },
+      select: { id: true, brandLogo: true, brandName: true }
     });
+
+    if (designerProfile) {
+      designerLogo = designerProfile.brandLogo;
+      designerBrandName = designerProfile.brandName;
+    }
 
     if (designerProfile) {
       [productCount, orderCount, voteCount] = await Promise.all([
@@ -82,6 +90,30 @@ export default async function DashboardPage() {
 
   return (
     <section className="space-y-6">
+      {/* Designer Brand Card - Only for Designers */}
+      {!isSuperAdmin && designerBrandName && (
+        <div className="rounded-3xl bg-gradient-to-br from-purple-50 via-white to-slate-50 p-6 border border-purple-100 shadow-sm">
+          <div className="flex items-center gap-4">
+            {designerLogo ? (
+              <img
+                src={designerLogo}
+                alt={`${designerBrandName} logo`}
+                className="h-16 w-16 object-cover rounded-xl border-2 border-purple-200 flex-shrink-0"
+              />
+            ) : (
+              <div className="h-16 w-16 rounded-xl bg-purple-200 flex items-center justify-center text-purple-700 font-bold text-xl">
+                {designerBrandName.slice(0, 2).toUpperCase()}
+              </div>
+            )}
+            <div className="flex-1">
+              <p className="text-xs uppercase tracking-widest text-slate-500 mb-1">Your Brand</p>
+              <h2 className="text-2xl font-black text-slate-900">{designerBrandName}</h2>
+              <p className="text-sm text-slate-600 mt-1">Designer Dashboard</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {/* Products / Designers Card */}

@@ -11,7 +11,7 @@ interface Product {
   name: string;
   price: number;
   isVisible: boolean;
-  designer: { brandName: string };
+  designer: { brandName: string; brandLogo: string | null };
   images: Array<{ url: string }>;
   votesCount: number;
   variantsCount: number;
@@ -187,7 +187,16 @@ export default function AdminProductsPageClient({
               </div>
               <div className="p-4">
                 <h3 className="font-bold text-lg mb-1 truncate">{product.name}</h3>
-                <p className="text-slate-600 text-sm mb-3">{product.designer.brandName}</p>
+                <div className="flex items-center gap-2 mb-3">
+                  {product.designer.brandLogo && (
+                    <img
+                      src={product.designer.brandLogo}
+                      alt={`${product.designer.brandName} logo`}
+                      className="h-5 w-5 object-cover rounded"
+                    />
+                  )}
+                  <p className="text-slate-600 text-sm">{product.designer.brandName}</p>
+                </div>
                 <p className="text-xs text-slate-500 mb-4">{product.variantsCount} variants • {product.votesCount} votes</p>
                 <div className="space-y-2">
                   <Link href={`/products/${product.id}`} className="block text-center rounded-lg bg-slate-100 text-slate-900 px-3 py-2 font-semibold text-sm hover:bg-slate-200 transition-all">

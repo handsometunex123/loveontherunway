@@ -22,7 +22,10 @@ export default async function AdminProductsPage() {
     name: product.name,
     price: Number(product.price),
     isVisible: product.isVisible,
-    designer: { brandName: product.designer.brandName },
+    designer: { 
+      brandName: product.designer.brandName,
+      brandLogo: product.designer.brandLogo 
+    },
     images: product.images.map((image: (typeof product.images)[number]) => ({ url: image.url })),
     votesCount: product.votes.length,
     variantsCount: product.variants.length

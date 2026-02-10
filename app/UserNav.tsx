@@ -2,14 +2,16 @@
 
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+import { memo } from "react";
 
 interface UserNavProps {
   displayName?: string;
+  brandLogo?: string;
   variant?: "desktop" | "mobile";
   onNavigate?: () => void;
 }
 
-export default function UserNav({ displayName, variant = "desktop", onNavigate }: UserNavProps) {
+function UserNav({ displayName, brandLogo, variant = "desktop", onNavigate }: UserNavProps) {
   const { data: session } = useSession();
   const handleNavigate = () => onNavigate?.();
 
@@ -20,7 +22,7 @@ export default function UserNav({ displayName, variant = "desktop", onNavigate }
           <Link
             href="/login"
             onClick={handleNavigate}
-            className="flex items-center justify-center rounded-lg px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-100"
+            className="flex items-center justify-center rounded-lg px-4 py-3 text-base font-semibold text-slate-900 hover:bg-slate-100"
           >
             Login
           </Link>
@@ -30,7 +32,7 @@ export default function UserNav({ displayName, variant = "desktop", onNavigate }
 
     return (
       <li>
-        <a href="/login" className="hover:text-purple-600 border-transparent text-slate-900 hover:border-slate-200 hover:bg-white">Login</a>
+        <a href="/login" className="text-lg lg:text-xl hover:text-purple-600 border-transparent text-slate-900 hover:border-slate-200 hover:bg-white">Login</a>
       </li>
     );
   }
@@ -41,11 +43,19 @@ export default function UserNav({ displayName, variant = "desktop", onNavigate }
         <Link
           href="/admin"
           onClick={handleNavigate}
-          className="flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-100"
+          className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 text-base font-semibold text-slate-900 hover:bg-slate-50 transition-all"
         >
-          <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-          </svg>
+          {brandLogo ? (
+            <img
+              src={brandLogo}
+              alt={`${displayName || session.user.email} logo`}
+              className="h-9 w-9 rounded-full object-cover ring-2 ring-purple-200"
+            />
+          ) : (
+            <div className="h-9 w-9 rounded-full bg-slate-200 flex items-center justify-center text-slate-800 text-xs font-bold ring-2 ring-slate-100">
+              {(displayName || session.user.email || "U").slice(0, 2).toUpperCase()}
+            </div>
+          )}
           {displayName || session.user.email}
         </Link>
         <button
@@ -54,7 +64,7 @@ export default function UserNav({ displayName, variant = "desktop", onNavigate }
             handleNavigate();
             signOut({ callbackUrl: "/login" });
           }}
-          className="flex items-center justify-center rounded-lg px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50"
+          className="flex items-center justify-center rounded-lg px-4 py-3 text-base font-semibold text-red-600 hover:bg-red-50"
         >
           Logout
         </button>
@@ -67,15 +77,19 @@ export default function UserNav({ displayName, variant = "desktop", onNavigate }
       <li>
         <Link 
           href="/admin" 
-          className="flex items-center gap-2 rounded-full border border-transparent px-4 py-2 text-sm font-medium text-slate-600 hover:border-slate-200 hover:bg-white hover:text-purple-600 transition-all"
+          className="flex items-center gap-3 rounded-full bg-white/90 px-4 py-2 text-base lg:text-lg font-semibold text-slate-800 hover:bg-white hover:text-purple-700 transition-all"
         >
-          <svg
-            className="h-4 w-4"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-          </svg>
+          {brandLogo ? (
+            <img
+              src={brandLogo}
+              alt={`${displayName || session.user.email} logo`}
+              className="h-8 w-8 rounded-full object-cover ring-2 ring-purple-200"
+            />
+          ) : (
+            <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-800 text-[10px] font-bold ring-2 ring-slate-100">
+              {(displayName || session.user.email || "U").slice(0, 2).toUpperCase()}
+            </div>
+          )}
           {displayName || session.user.email}
         </Link>
       </li>
@@ -83,7 +97,7 @@ export default function UserNav({ displayName, variant = "desktop", onNavigate }
         <button
           type="button"
           onClick={() => signOut({ callbackUrl: "/login" })}
-          className="rounded-full border border-transparent px-4 py-2 text-sm font-medium text-slate-600 hover:border-slate-200 hover:bg-white hover:text-red-600 transition-all cursor-pointer"
+          className="rounded-full bg-white/90 px-4 py-2 text-base lg:text-lg font-semibold text-slate-600 hover:bg-white hover:text-red-600 transition-all cursor-pointer"
         >
           Logout
         </button>
@@ -91,3 +105,5 @@ export default function UserNav({ displayName, variant = "desktop", onNavigate }
     </>
   );
 }
+
+export default memo(UserNav);

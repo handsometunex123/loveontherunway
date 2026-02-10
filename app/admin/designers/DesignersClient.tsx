@@ -109,11 +109,24 @@ export default function DesignersClient({
               }`}
             >
               <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="font-bold text-lg text-slate-900">
-                    {designer.brandName}
-                  </h3>
-                  <p className="text-slate-500 text-sm">{designer.user.email}</p>
+                <div className="flex items-start gap-3 flex-1">
+                  {designer.brandLogo ? (
+                    <img
+                      src={designer.brandLogo}
+                      alt={`${designer.brandName} logo`}
+                      className="h-12 w-12 object-cover rounded-lg border border-slate-200 flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="h-12 w-12 rounded-lg bg-slate-200 flex items-center justify-center text-slate-700 font-bold flex-shrink-0">
+                      {designer.brandName.slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-lg text-slate-900">
+                      {designer.brandName}
+                    </h3>
+                    <p className="text-slate-500 text-sm">{designer.user.email}</p>
+                  </div>
                 </div>
                 <span
                   className={`rounded-full px-3 py-1 text-xs font-semibold ${

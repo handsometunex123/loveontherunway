@@ -1,16 +1,45 @@
 import "./globals.css";
 import Link from "next/link";
+import Image from "next/image";
 import AuthProvider from "./AuthProvider";
 import HeaderNav from "./HeaderNav";
+import CartNotification from "./CartNotification";
 import ToastContainer from "@/components/ToastContainer";
 import { ToastProvider } from "@/context/ToastContext";
+import { LoadingProvider } from "@/context/LoadingContext";
+import ProgressBar from "@/components/ProgressBar";
+import FetchInterceptorInit from "@/components/FetchInterceptorInit";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { Metadata } from "next";
 
-export const metadata = {
-  title: "Love On The Runway",
-  description: "Fashion show ecommerce platform for a church event."
+export const metadata: Metadata = {
+  title: "Love On The Runway | Fashion Show Platform",
+  description: "Discover emerging fashion designers and exclusive collections at Love On The Runway. Featuring curated designer pieces and a unique voting experience.",
+  keywords: ["fashion", "designers", "runway", "clothing", "fashion show", "ecommerce"],
+  authors: [{ name: "Love On The Runway" }],
+  openGraph: {
+    title: "Love On The Runway | Fashion Show Platform",
+    description: "Discover emerging fashion designers and exclusive collections",
+    url: "https://loveontherunway.com",
+    siteName: "Love On The Runway",
+    images: [
+      {
+        url: "https://loveontherunway.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Love On The Runway"
+      }
+    ],
+    type: "website"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Love On The Runway",
+    description: "Discover emerging fashion designers and exclusive collections",
+    images: ["https://loveontherunway.com/og-image.png"]
+  }
 };
 
 export default async function RootLayout({
@@ -18,7 +47,9 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+
   let displayName: string | undefined;
+  let brandLogo: string | undefined;
   
   try {
     const session = await getServerSession(authOptions);
@@ -29,46 +60,65 @@ export default async function RootLayout({
      
       if (designerProfile?.brandName) {
         displayName = designerProfile.brandName;
+        brandLogo = designerProfile.brandLogo ?? undefined;
       }
     }
   } catch (error) {
     // Silently handle errors
   }
+
+  // JSON-LD Organization Schema
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Love On The Runway",
+    "url": "https://loveontherunway.com",
+    "logo": "https://loveontherunway.com/og-image.png",
+    "description": "Fashion show platform featuring emerging designers and exclusive collections",
+    "sameAs": []
+  };
+
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+      </head>
       <body className="bg-slate-50 text-slate-900">
         <AuthProvider>
-          <ToastProvider>
-            <header className="sticky top-0 z-20 border-b border-slate-200/50 bg-white/90 backdrop-blur-2xl shadow-sm">
-              <div className="w-full md:mx-auto flex items-center justify-between px-4 md:px-6 py-3.5 md:py-4 md:max-w-6xl">
+          <LoadingProvider>
+            <FetchInterceptorInit />
+            <ProgressBar />
+            <ToastProvider>
+              <header className="sticky top-0 z-20 border-b border-slate-200/70 bg-white/95 backdrop-blur-2xl">
+              <div className="w-full md:mx-auto flex items-center justify-between px-4 md:px-6 py-2 md:py-3 md:max-w-7xl">
                 {/* Logo - Left */}
-                <Link href="/" className="group flex items-center gap-2 md:gap-3 font-bold flex-shrink-0 hover:opacity-80 transition-opacity">
-                  <span className="inline-flex h-9 md:h-10 w-9 md:w-10 items-center justify-center rounded-xl md:rounded-2xl bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-700 text-white shadow-lg shadow-purple-300/50 text-base md:text-lg group-hover:shadow-purple-400/60 transition-shadow">
-                    ✦
-                  </span>
-                </Link>
-                
-                {/* Center Text - Mobile Only */}
-                <span className="md:hidden text-sm font-black tracking-[0.25em] text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-purple-800 to-slate-900">
-                  LOTRW
-                </span>
-                
-                {/* Full Brand Name - Desktop Only */}
-                <Link href="/" className="hidden md:flex items-center gap-3 font-bold hover:opacity-80 transition-opacity">
-                  <span className="text-sm font-black tracking-[0.15em] text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-purple-800 to-slate-900">
-                    LOVE ON THE RUNWAY
-                  </span>
+                <Link href="/" className="group flex items-center font-bold flex-shrink-0 hover:opacity-90 transition-all">
+                  <div className="relative h-24 md:h-28 w-auto rounded-2xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-white p-2 shadow-md hover:shadow-lg hover:border-purple-300 transition-all">
+                    <Image
+                      src="/logo.jpg"
+                      alt="Love On The Runway"
+                      height={200}
+                      width={350}
+                      className="h-20 md:h-24 w-auto object-contain rounded-xl"
+                      priority
+                    />
+                  </div>
                 </Link>
                 
                 {/* Navigation - Right */}
-                <HeaderNav displayName={displayName} />
+                <HeaderNav displayName={displayName} brandLogo={brandLogo} />
               </div>
             </header>
             <main className="mx-auto w-full max-w-6xl px-4 md:px-6 py-12 md:py-20">
               {children}
             </main>
-            <ToastContainer />
-          </ToastProvider>
+              <CartNotification />
+              <ToastContainer />
+            </ToastProvider>
+          </LoadingProvider>
         </AuthProvider>
       </body>
     </html>

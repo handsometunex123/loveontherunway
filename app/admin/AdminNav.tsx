@@ -16,6 +16,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Orders", href: "/admin/orders" },
   { label: "Profile", href: "/admin/profile", designerOnly: true },
   { label: "Designers", href: "/admin/designers", superAdminOnly: true },
+  { label: "Gallery", href: "/admin/gallery", superAdminOnly: true },
   { label: "Settings", href: "/admin/settings", superAdminOnly: true }
 ];
 
