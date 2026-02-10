@@ -16,19 +16,27 @@ export default async function DesignerProfilePage() {
   }
 
   return (
-    <section>
+    <section className="space-y-6">
       <div className="mb-4 md:mb-6">
         <BackButton fallbackUrl="/admin/dashboard" />
       </div>
-      <h2 className="text-2xl font-bold mb-6">My Profile</h2>
-      <div className="max-w-xl rounded-2xl bg-white p-6 md:p-8 border border-slate-200">
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 md:p-8">
+        <div className="mb-6">
+          <h2 className="text-2xl md:text-3xl font-black text-slate-900">My Profile</h2>
+          <p className="text-sm text-slate-600 mt-1">Keep your brand details fresh and easy for shoppers to recognize.</p>
+        </div>
         <ProfileForm
           initialProfile={{
             name: designerProfile.user.name ?? "",
             email: designerProfile.user.email ?? "",
             phone: designerProfile.user.phone ?? "",
             brandName: designerProfile.brandName,
-            bio: designerProfile.bio ?? ""
+            bio: designerProfile.bio ?? "",
+            brandLogo: designerProfile.brandLogo ?? undefined,
+            website: designerProfile.website ?? undefined,
+            instagram: designerProfile.instagram ?? undefined,
+            twitter: designerProfile.twitter ?? undefined,
+            tiktok: designerProfile.tiktok ?? undefined
           }}
         />
       </div>

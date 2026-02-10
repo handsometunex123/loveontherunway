@@ -9,14 +9,15 @@ import { useState } from "react";
 const NAV_ITEMS = [
   { label: "Designers", href: "/designers" },
   { label: "Cart", href: "/cart" },
-  { label: "Vote", href: "/vote" }
+  // { label: "Vote", href: "/vote" }
 ];
 
 interface HeaderNavProps {
   displayName?: string;
+  brandLogo?: string;
 }
 
-export default function HeaderNav({ displayName }: HeaderNavProps) {
+export default function HeaderNav({ displayName, brandLogo }: HeaderNavProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -27,26 +28,32 @@ export default function HeaderNav({ displayName }: HeaderNavProps) {
   return (
     <nav className="flex items-center gap-3 md:gap-0 md:ml-12">
       {/* Desktop Navigation */}
-      <ul className="hidden md:flex list-none gap-3 p-0 m-0 items-center">
+      <ul className="hidden md:flex list-none gap-1 p-2 m-0 items-center rounded-2xl bg-gradient-to-br from-white/95 to-white/85 backdrop-blur-md border border-white/40 shadow-lg">
         {NAV_ITEMS.map((item) => {
           const active = isActive(item.href);
           return (
             <li key={item.href}>
               <Link
                 href={item.href}
-                className={`relative inline-flex items-center rounded-full border px-3 py-2 text-sm font-bold transition-all ${
+                className={`relative inline-flex items-center gap-2.5 rounded-xl px-5 py-3 text-base lg:text-lg font-bold transition-all duration-300 ${
                   active
-                    ? "border-slate-900 bg-slate-900 text-white shadow-sm"
-                    : "border-transparent text-slate-900 hover:border-slate-200 hover:bg-white"
+                    ? "bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-lg scale-105"
+                    : "text-slate-700 hover:text-slate-900 hover:bg-white/60"
                 }`}
               >
-                {item.label}
+                {item.href === "/cart" && (
+                  <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.16.12-.33.12-.5 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" />
+                  </svg>
+                )}
+                <span>{item.label}</span>
                 {item.href === "/cart" ? <CartCountBadge /> : null}
               </Link>
             </li>
           );
         })}
-        <UserNav displayName={displayName} />
+        <div className="h-8 w-px bg-slate-200 mx-1"></div>
+        <UserNav displayName={displayName} brandLogo={brandLogo} />
       </ul>
 
       {/* Mobile Navigation Toggle */}
@@ -54,9 +61,9 @@ export default function HeaderNav({ displayName }: HeaderNavProps) {
         <button
           type="button"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="inline-flex items-center rounded-lg border border-transparent p-2 text-slate-900 hover:bg-white hover:border-slate-200 transition-all"
+          className="inline-flex items-center rounded-xl bg-gradient-to-br from-white/95 to-white/85 backdrop-blur-md p-2.5 text-slate-900 hover:bg-white transition-all duration-300 shadow-md border border-white/40"
         >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             {mobileMenuOpen ? (
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             ) : (
@@ -68,7 +75,7 @@ export default function HeaderNav({ displayName }: HeaderNavProps) {
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-lg md:hidden mx-4 z-50">
+        <div className="absolute top-full left-0 right-0 mt-3 bg-gradient-to-br from-white/98 to-white/95 backdrop-blur-md rounded-2xl md:hidden mx-4 z-50 shadow-2xl border border-white/40">
           <div className="flex flex-col gap-2 p-4">
             {NAV_ITEMS.map((item) => {
               const active = isActive(item.href);
@@ -77,18 +84,26 @@ export default function HeaderNav({ displayName }: HeaderNavProps) {
                   key={item.href}
                   href={item.href}
                   onClick={closeMobileMenu}
-                  className={`flex items-center justify-between rounded-lg px-4 py-3 text-sm font-semibold transition-all ${
+                  className={`flex items-center justify-between rounded-lg px-4 py-3 text-base font-semibold transition-all duration-300 ${
                     active
-                      ? "bg-slate-900 text-white"
-                      : "text-slate-900 hover:bg-slate-100"
+                      ? "bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-lg"
+                      : "text-slate-700 hover:text-slate-900 hover:bg-white/60"
                   }`}
                 >
-                  {item.label}
+                  <div className="flex items-center gap-3">
+                    {item.href === "/cart" && (
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.16.12-.33.12-.5 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" />
+                      </svg>
+                    )}
+                    {item.label}
+                  </div>
                   {item.href === "/cart" ? <CartCountBadge /> : null}
                 </Link>
               );
             })}
-            <UserNav displayName={displayName} variant="mobile" onNavigate={closeMobileMenu} />
+            <div className="h-px bg-slate-200 my-2"></div>
+            <UserNav displayName={displayName} brandLogo={brandLogo} variant="mobile" onNavigate={closeMobileMenu} />
           </div>
         </div>
       )}

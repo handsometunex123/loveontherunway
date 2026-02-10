@@ -47,7 +47,12 @@ export const designerProfileSchema = z.object({
   name: z.string().min(2).max(100).optional(),
   phone: z.string().min(7).max(20),
   brandName: z.string().min(2).max(120),
-  bio: z.string().min(10).max(2000)
+  bio: z.string().min(10).max(2000),
+  brandLogo: z.string().url().optional(),
+  website: z.string().url().optional(),
+  instagram: z.string().max(100).optional(),
+  twitter: z.string().max(100).optional(),
+  tiktok: z.string().max(100).optional()
 });
 
 export const settingsSchema = z.object({

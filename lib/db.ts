@@ -5,21 +5,14 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
-let db: PrismaClient | null = null;
+// PrismaClient is attached to the `global` object in development to prevent
+// exhausting your database connection limit during hot reloads in development.
+// Learn more: https://pris.ly/d/help/next-js-best-practices
 
-function initializeDb(): PrismaClient {
-  if (db) return db;
+const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
-  db = new PrismaClient();
-  return db;
-}
-
-// Lazy initialize only when actually needed (at runtime, not build time)
-const dbProxy = new Proxy({} as PrismaClient, {
-  get: (target, prop) => {
-    const client = initializeDb();
-    return (client as any)[prop];
-  }
+export const db = globalForPrisma.prisma || new PrismaClient({
+  log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
 });
 
-export { dbProxy as db };
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db;

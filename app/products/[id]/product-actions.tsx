@@ -16,6 +16,7 @@ type ProductInfo = {
   name: string;
   price: number;
   designerName: string;
+  designerLogo?: string;
   imageUrl?: string;
   variants: Variant[];
 };
@@ -75,6 +76,7 @@ export default function ProductActions({ product }: { product: ProductInfo }) {
       name: product.name,
       price: product.price,
       designerName: product.designerName,
+      designerLogo: product.designerLogo,
       imageUrl: product.imageUrl,
       size: selectedVariant.size,
       color: selectedVariant.color
@@ -135,11 +137,21 @@ export default function ProductActions({ product }: { product: ProductInfo }) {
       )}
 
       {selectedVariant ? (
-        <div className="mb-4 rounded-lg bg-slate-50 p-3">
-          <p className="font-semibold text-sm text-slate-900 mb-2">Measurements</p>
-          <pre className="text-xs text-slate-700 whitespace-pre-wrap">
-            {JSON.stringify(selectedVariant.measurements, null, 2)}
-          </pre>
+        <div className="mb-4 rounded-2xl bg-gradient-to-br from-purple-50 to-slate-50 border border-purple-100 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5.04-6.71l-2.75 3.54-1.3-1.54c-.3-.36-.77-.36-1.07 0-.3.36-.3.95 0 1.31l1.84 2.19c.3.36.77.36 1.07 0l3.29-4.04c.3-.36.3-.95 0-1.31-.3-.36-.77-.36-1.07 0z" />
+            </svg>
+            <p className="font-bold text-sm text-slate-900">Measurements</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {Object.entries(selectedVariant.measurements).map(([key, value]) => (
+              <div key={key} className="bg-white rounded-lg p-3 border border-purple-100/50">
+                <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1">{key}</p>
+                <p className="text-sm font-bold text-slate-900">{value}</p>
+              </div>
+            ))}
+          </div>
         </div>
       ) : null}
 

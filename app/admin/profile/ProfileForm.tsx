@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ButtonLoader } from "@/components/Loader";
 
 type ProfileData = {
   name: string;
@@ -8,6 +9,11 @@ type ProfileData = {
   phone: string;
   brandName: string;
   bio: string;
+  brandLogo?: string;
+  website?: string;
+  instagram?: string;
+  twitter?: string;
+  tiktok?: string;
 };
 
 export default function ProfileForm({ initialProfile }: { initialProfile: ProfileData }) {
@@ -15,9 +21,50 @@ export default function ProfileForm({ initialProfile }: { initialProfile: Profil
   const [phone, setPhone] = useState(initialProfile.phone);
   const [brandName, setBrandName] = useState(initialProfile.brandName);
   const [bio, setBio] = useState(initialProfile.bio);
+  const [brandLogo, setBrandLogo] = useState(initialProfile.brandLogo || "");
+  const [website, setWebsite] = useState(initialProfile.website || "");
+  const [instagram, setInstagram] = useState(initialProfile.instagram || "");
+  const [twitter, setTwitter] = useState(initialProfile.twitter || "");
+  const [tiktok, setTiktok] = useState(initialProfile.tiktok || "");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      setError("Logo must be under 2MB");
+      return;
+    }
+
+    setUploadingLogo(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "lotr_logos");
+
+    try {
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: "POST",
+          body: formData
+        }
+      );
+
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+      setBrandLogo(data.secure_url);
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to upload logo");
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -33,7 +80,12 @@ export default function ProfileForm({ initialProfile }: { initialProfile: Profil
           name: name.trim() || undefined,
           phone: phone.trim(),
           brandName: brandName.trim(),
-          bio: bio.trim()
+          bio: bio.trim(),
+          brandLogo: brandLogo || undefined,
+          website: website.trim() || undefined,
+          instagram: instagram.trim() || undefined,
+          twitter: twitter.trim() || undefined,
+          tiktok: tiktok.trim() || undefined
         })
       });
 
@@ -100,6 +152,28 @@ export default function ProfileForm({ initialProfile }: { initialProfile: Profil
       </div>
 
       <div>
+        <label className="block text-sm font-semibold text-slate-900 mb-2">Brand Logo</label>
+        <div className="flex gap-3 items-end">
+          <div className="flex-1">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleLogoUpload}
+              disabled={uploadingLogo}
+              className="w-full text-sm"
+            />
+            <p className="text-xs text-slate-500 mt-1">Max 2MB. Recommended: 200x200px</p>
+          </div>
+          {uploadingLogo && <ButtonLoader />}
+        </div>
+        {brandLogo && (
+          <div className="mt-3">
+            <img src={brandLogo} alt="Brand Logo" className="h-20 w-20 object-cover rounded-lg border border-slate-300" />
+          </div>
+        )}
+      </div>
+
+      <div>
         <label className="block text-sm font-semibold text-slate-900 mb-2">Bio</label>
         <textarea
           value={bio}
@@ -107,6 +181,54 @@ export default function ProfileForm({ initialProfile }: { initialProfile: Profil
           rows={4}
           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
           required
+        />
+      </div>
+
+      <hr className="my-2" />
+
+      <h3 className="text-sm font-semibold text-slate-900">Social Media & Links (Optional)</h3>
+
+      <div>
+        <label className="block text-sm font-semibold text-slate-900 mb-2">Personal Website</label>
+        <input
+          type="url"
+          value={website}
+          onChange={(event) => setWebsite(event.target.value)}
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+          placeholder="https://yourwebsite.com"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-slate-900 mb-2">Instagram Handle</label>
+        <input
+          type="text"
+          value={instagram}
+          onChange={(event) => setInstagram(event.target.value)}
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+          placeholder="@yourhandle"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-slate-900 mb-2">Twitter/X Handle</label>
+        <input
+          type="text"
+          value={twitter}
+          onChange={(event) => setTwitter(event.target.value)}
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+          placeholder="@yourhandle"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-slate-900 mb-2">TikTok Handle</label>
+        <input
+          type="text"
+          value={tiktok}
+          onChange={(event) => setTiktok(event.target.value)}
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+          placeholder="@yourhandle"
         />
       </div>
 
@@ -125,9 +247,15 @@ export default function ProfileForm({ initialProfile }: { initialProfile: Profil
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-lg bg-slate-900 px-4 py-2 font-semibold text-sm text-white hover:bg-slate-800 disabled:opacity-50"
+        className="w-full rounded-lg bg-slate-900 px-4 py-2 font-semibold text-sm text-white hover:bg-slate-800 disabled:opacity-50 flex items-center justify-center gap-2"
       >
-        {loading ? "Saving..." : "Update Profile"}
+        {loading ? (
+          <>
+            <ButtonLoader color="white" /> Saving...
+          </>
+        ) : (
+          "Update Profile"
+        )}
       </button>
     </form>
   );

@@ -37,7 +37,7 @@ export async function GET() {
     });
   }
 
-  const productsWithCounts = products?.map((product) => ({
+  const productsWithCounts = products?.map((product: any) => ({
     ...product,
     price: Number(product.price),
     votesCount: product.votes.length,

@@ -75,7 +75,16 @@ export default function CartClient() {
 
                   <div className="flex-1">
                     <h3 className="text-lg font-bold text-slate-900 group-hover:text-purple-700">{item.name ?? "Product"}</h3>
-                    <p className="text-sm text-slate-600">{item.designerName ?? "Designer"}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {item.designerLogo && (
+                        <img
+                          src={item.designerLogo}
+                          alt={`${item.designerName} logo`}
+                          className="h-5 w-5 object-cover rounded"
+                        />
+                      )}
+                      <p className="text-sm text-slate-600">{item.designerName ?? "Designer"}</p>
+                    </div>
 
                     <div className="mt-2 flex flex-wrap gap-4 text-sm text-slate-700">
                       {item.price && <span className="font-semibold text-purple-600">NGN {item.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>}

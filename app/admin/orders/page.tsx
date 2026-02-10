@@ -67,10 +67,17 @@ export default async function AdminOrdersPage() {
       ) : (
         <div className="mt-8 grid auto-fit grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-5">
           {(orders as Order[]).map(function (order: Order) {
-            const designers = new Set(
-              order.items.map(function (item: any) { return item.product.designer.brandName; })
-            );
-            const designerNames = Array.from(designers);
+            const designersMap = new Map<string, { name: string; logo: string | null }>();
+            order.items.forEach(function (item: any) {
+              const designer = item.product.designer;
+              if (!designersMap.has(designer.id)) {
+                designersMap.set(designer.id, {
+                  name: designer.brandName,
+                  logo: designer.brandLogo
+                });
+              }
+            });
+            const designers = Array.from(designersMap.values());
             return (
             <Link
               key={order.id}
@@ -95,15 +102,22 @@ export default async function AdminOrdersPage() {
                   </span>
                 </div>
                 <p className="text-slate-600 text-sm">{order.customer.email}</p>
-                {designerNames.length > 0 && (
+                {designers.length > 0 && (
                   <div className="pt-2 border-t border-slate-100">
-                    <p className="text-xs font-semibold text-slate-700 mb-1">Designers:</p>
+                    <p className="text-xs font-semibold text-slate-700 mb-2">Designers:</p>
                     <div className="flex flex-wrap gap-2">
-                      {designerNames.map(function (designer: any, idx: number) {
+                      {designers.map(function (designer, idx) {
                         return (
-                          <span key={idx} className="inline-flex items-center rounded-lg bg-slate-100 px-2 py-1 text-xs text-slate-700 font-medium">
-                            {designer}
-                          </span>
+                          <div key={idx} className="flex items-center gap-1.5 bg-slate-50 rounded-lg px-2 py-1">
+                            {designer.logo && (
+                              <img
+                                src={designer.logo}
+                                alt={`${designer.name} logo`}
+                                className="h-4 w-4 object-cover rounded"
+                              />
+                            )}
+                            <span className="text-xs text-slate-700">{designer.name}</span>
+                          </div>
                         );
                       })}
                     </div>

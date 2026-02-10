@@ -92,6 +92,32 @@
   }
 }
 
+@keyframes pageFlip {
+  from {
+    transform: perspective(1000px) rotateY(-25deg);
+    opacity: 0;
+  }
+  to {
+    transform: perspective(1000px) rotateY(0deg);
+    opacity: 1;
+  }
+}
 
+@keyframes pageFlipReverse {
+  from {
+    transform: perspective(1000px) rotateY(25deg);
+    opacity: 0;
+  }
+  to {
+    transform: perspective(1000px) rotateY(0deg);
+    opacity: 1;
+  }
+}
 
+.page-flip-in {
+  animation: pageFlip 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
 
+.page-flip-in.reverse {
+  animation: pageFlipReverse 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}

@@ -5,9 +5,31 @@ import BackButton from "@/app/BackButton";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { Metadata } from "next";
 
 interface ProductPageProps {
   params: { id: string };
+}
+
+export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+  const product = await db.product.findUnique({
+    where: { id: params.id },
+    include: { images: true, designer: true }
+  });
+
+  if (!product) {
+    return { title: "Product Not Found | Love On The Runway" };
+  }
+
+  return {
+    title: `${product.name} | ${product.designer.brandName} | Love On The Runway`,
+    description: product.description || `Explore ${product.name} by ${product.designer.brandName}.`,
+    openGraph: {
+      title: `${product.name} | Love On The Runway`,
+      description: product.description || `Explore ${product.name} by ${product.designer.brandName}.`,
+      images: product.images?.length ? [{ url: product.images[0].url }] : undefined
+    }
+  };
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
@@ -51,8 +73,66 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const heroImage = product.images[0]?.url;
   const price = typeof product.price === 'number' ? product.price : parseFloat(product.price.toString());
 
+  // JSON-LD Structured Data
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "description": product.description || `${product.name} by ${product.designer.brandName}`,
+    "brand": {
+      "@type": "Brand",
+      "name": product.designer.brandName
+    },
+    "image": product.images.map((img: any) => img.url),
+    "offers": {
+      "@type": "Offer",
+      "url": `https://loveontherunway.com/products/${product.id}`,
+      "priceCurrency": "USD",
+      "price": price,
+      "availability": "https://schema.org/InStock",
+      "seller": {
+        "@type": "Organization",
+        "name": product.designer.brandName
+      }
+    }
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://loveontherunway.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": product.designer.brandName,
+        "item": `https://loveontherunway.com/designers/${product.designerId}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": product.name
+      }
+    ]
+  };
+
   return (
     <section className="space-y-6 md:space-y-8">
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
       <div className="mb-2 md:mb-4">
         <BackButton fallbackUrl="/" />
       </div>
@@ -66,7 +146,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </h1>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <p className="text-sm text-slate-500">By <span className="font-semibold text-slate-800">{product.designer.brandName}</span></p>
+          <div className="flex items-center gap-2">
+            {product.designer.brandLogo && (
+              <img
+                src={product.designer.brandLogo}
+                alt={`${product.designer.brandName} logo`}
+                className="h-6 w-6 object-cover rounded border border-slate-200"
+              />
+            )}
+            <p className="text-sm text-slate-500">By <span className="font-semibold text-slate-800">{product.designer.brandName}</span></p>
+          </div>
           <span className="inline-flex items-center rounded-full border border-purple-200 bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
             {product.category === "MALE" ? "👔 Men's Collection" : "👗 Women's Collection"}
           </span>
@@ -118,6 +207,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 name: product.name,
                 price: price,
                 designerName: product.designer.brandName,
+                designerLogo: product.designer.brandLogo || undefined,
                 imageUrl: heroImage,
                 variants: product.variants.map((variant: any) => ({
                   id: variant.id,
