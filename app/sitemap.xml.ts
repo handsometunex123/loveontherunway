@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   const baseUrl = 'https://loveontherunway.com';
 
-  // Static routes
+  // Static routesss
   const staticRoutes = [
     {
       url: baseUrl,
