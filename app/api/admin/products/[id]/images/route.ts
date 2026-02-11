@@ -15,7 +15,6 @@ export async function POST(request: Request, { params }: { params: { id: string 
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const product = await db.product.findUnique({ where: { id: params.id } });
   const product = await db.product.findUnique({ where: { id: params.id, isDeleted: false } });
 
   if (!product) {
