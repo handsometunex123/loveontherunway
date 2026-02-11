@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     itemsWithProducts = await Promise.all(
       parsed.data.items.map(async (item) => {
         const product = await db.product.findUnique({
-          where: { id: item.productId },
+          where: { id: item.productId, isDeleted: false },
           include: { designer: { include: { user: true } } }
         });
 

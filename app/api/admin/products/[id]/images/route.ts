@@ -16,6 +16,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
   }
 
   const product = await db.product.findUnique({ where: { id: params.id } });
+  const product = await db.product.findUnique({ where: { id: params.id, isDeleted: false } });
 
   if (!product) {
     return NextResponse.json({ error: "Product not found" }, { status: 404 });

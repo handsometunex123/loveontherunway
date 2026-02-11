@@ -17,10 +17,13 @@ export default async function AdminProductsPage() {
     redirect("/");
   }
 
-  const designerProfile = await db.designerProfile.findUnique({ where: { userId: session.user.id } });
+    const designerProfile = await db.designerProfile.findUnique({ where: { userId: session.user.id, isDeleted: false } });
 
   const products = await db.product.findMany({
-    where: { designerId: designerProfile?.id ?? "" },
+    where: {
+      designerId: designerProfile?.id ?? "",
+      isDeleted: false
+    },
     include: { designer: true, images: true, votes: true, variants: true }
   });
 

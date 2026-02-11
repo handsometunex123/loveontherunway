@@ -7,7 +7,7 @@ export default async function CreateProductPage() {
   const session = await requireRole(["SUPER_ADMIN", "DESIGNER"]);
 
   const designerProfile = session.user.role === "DESIGNER"
-    ? await db.designerProfile.findUnique({ where: { userId: session.user.id } })
+    ? await db.designerProfile.findUnique({ where: { userId: session.user.id, isDeleted: false } })
     : null;
 
   if (session.user.role === "DESIGNER" && !designerProfile) {

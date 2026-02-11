@@ -7,7 +7,7 @@ export default async function DesignerProfilePage() {
   const session = await requireRole(["DESIGNER"]);
 
   const designerProfile = await db.designerProfile.findUnique({
-    where: { userId: session.user.id },
+    where: { userId: session.user.id, isDeleted: false },
     include: { user: true }
   });
 

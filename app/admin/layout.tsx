@@ -16,7 +16,7 @@ export default async function AdminLayout({
   // If user is a designer, use their brand name and logo
   if (session.user.role === "DESIGNER") {
     const designerProfile = await db.designerProfile.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: session.user.id, isDeleted: false },
       select: { brandName: true, brandLogo: true }
     });
     if (designerProfile?.brandName) {

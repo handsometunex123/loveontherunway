@@ -53,6 +53,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       where: {
         isApproved: true,
         isVisible: true,
+        isDeleted: false,
         user: { isActive: true }
       },
       include: {
@@ -68,6 +69,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     db.product.findMany({
       where: {
         isVisible: true,
+        isDeleted: false,
         designer: {
           isApproved: true,
           isVisible: true,

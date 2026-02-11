@@ -25,7 +25,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 
   if (parsed.data.isVisible === true) {
     const currentDesigner = await db.designerProfile.findUnique({
-      where: { id: params.id },
+      where: { id: params.id, isDeleted: false },
       select: { isApproved: true }
     });
 
@@ -61,7 +61,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   // If revoked, also deactivate the user account
   const designer = await db.$transaction(async (tx) => {
     const updatedDesigner = await tx.designerProfile.update({
-      where: { id: params.id },
+      where: { id: params.id, isDeleted: false },
       data: {
         isApproved: parsed.data.isApproved,
         isVisible: parsed.data.isVisible
@@ -267,7 +267,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
   try {
     const designerId = params.id;
-    const designerExists = await db.designerProfile.findUnique({ where: { id: designerId }, include: { user: true } });
+    const designerExists = await db.designerProfile.findUnique({ where: { id: designerId, isDeleted: false }, include: { user: true } });
     if (!designerExists) {
       return NextResponse.json({ error: "Designer not found." }, { status: 404 });
     }
@@ -276,7 +276,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     }
     await db.$transaction([
       db.product.updateMany({
-        where: { designerId },
+        where: { designerId, isDeleted: false },
         data: { isDeleted: { set: true } }
       }),
       db.designerProfile.update({

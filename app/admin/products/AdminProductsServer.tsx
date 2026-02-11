@@ -6,13 +6,16 @@ export default async function AdminProductsPage() {
   const session = await requireRole(["SUPER_ADMIN", "DESIGNER"]);
 
   const designerProfile = session.user.role === "DESIGNER"
-    ? await db.designerProfile.findUnique({ where: { userId: session.user.id } })
+    ? await db.designerProfile.findUnique({ where: { userId: session.user.id, isDeleted: false } })
     : null;
 
   const products = await db.product.findMany({
-    where: session.user.role === "SUPER_ADMIN"
-      ? {}
-      : { designerId: designerProfile?.id ?? "" },
+    where: {
+      isDeleted: false,
+      ...(session.user.role === "SUPER_ADMIN"
+        ? {}
+        : { designerId: designerProfile?.id ?? "" })
+    },
     include: { designer: true, images: true, votes: true, variants: true },
     orderBy: { createdAt: "desc" }
   });

@@ -8,7 +8,7 @@ export default async function AdminOrdersPage() {
   const session = await requireRole(["SUPER_ADMIN", "DESIGNER"]);
 
   const designerProfile = session.user.role === "DESIGNER"
-    ? await db.designerProfile.findUnique({ where: { userId: session.user.id } })
+    ? await db.designerProfile.findUnique({ where: { userId: session.user.id, isDeleted: false } })
     : null;
 
   const orders = session.user.role === "SUPER_ADMIN"

@@ -13,7 +13,7 @@ interface ProductPageProps {
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const product = await db.product.findUnique({
-    where: { id: params.id },
+    where: { id: params.id, isDeleted: false },
     include: { images: true, designer: true }
   });
 
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 export default async function ProductPage({ params }: ProductPageProps) {
   const session = await getServerSession(authOptions);
   const product = await db.product.findUnique({
-    where: { id: params.id },
+    where: { id: params.id, isDeleted: false },
     include: {
       images: true,
       variants: true,

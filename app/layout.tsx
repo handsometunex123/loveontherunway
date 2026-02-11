@@ -55,7 +55,7 @@ export default async function RootLayout({
     const session = await getServerSession(authOptions);
     if (session?.user?.id && session.user.role === "DESIGNER") {
       const designerProfile = await db.designerProfile.findUnique({
-        where: { userId: session.user.id }
+        where: { userId: session.user.id, isDeleted: false }
       });
      
       if (designerProfile?.brandName) {

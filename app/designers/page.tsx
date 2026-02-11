@@ -21,6 +21,7 @@ export default async function DesignersPage() {
     where: {
       isApproved: true,
       isVisible: true,
+      isDeleted: false,
       user: { isActive: true }
     },
     include: {

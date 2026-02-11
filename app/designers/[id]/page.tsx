@@ -14,7 +14,7 @@ interface DesignerPageProps {
 
 export async function generateMetadata({ params }: DesignerPageProps): Promise<Metadata> {
   const designer = await db.designerProfile.findUnique({
-    where: { id: params.id },
+    where: { id: params.id, isDeleted: false },
     select: { brandName: true, bio: true, brandLogo: true }
   });
 
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: DesignerPageProps): Promise<M
 export default async function DesignerPage({ params }: DesignerPageProps) {
   const session = await getServerSession(authOptions);
   const designer = await db.designerProfile.findUnique({
-    where: { id: params.id },
+    where: { id: params.id, isDeleted: false },
     include: { products: { where: { isVisible: true }, include: { images: true } }, user: true }
   });
 

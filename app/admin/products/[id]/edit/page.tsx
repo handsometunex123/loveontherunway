@@ -14,7 +14,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
   const session = await requireRole(["SUPER_ADMIN", "DESIGNER"]);
 
   const product = await db.product.findUnique({
-    where: { id: params.id },
+    where: { id: params.id, isDeleted: false },
     include: { images: true, variants: true }
   });
 
@@ -25,7 +25,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
   let designerProfile = null;
   if (session.user.role === "DESIGNER") {
     designerProfile = await db.designerProfile.findUnique({
-      where: { userId: session.user.id }
+      where: { userId: session.user.id, isDeleted: false }
     });
 
     if (!designerProfile || product.designerId !== designerProfile.id) {

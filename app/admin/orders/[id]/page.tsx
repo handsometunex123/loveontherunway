@@ -36,7 +36,7 @@ export default async function AdminOrderDetailsPage({ params }: OrderDetailsProp
   let designerProfile: Awaited<ReturnType<typeof db.designerProfile.findUnique>> | null = null;
   if (session.user.role === "DESIGNER") {
     designerProfile = await db.designerProfile.findUnique({
-      where: { userId: session.user.id }
+      where: { userId: session.user.id, isDeleted: false }
     });
 
     const hasAccess = order.items.some((item: any) => item.product.designerId === designerProfile?.id);

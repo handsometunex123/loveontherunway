@@ -11,7 +11,7 @@ export default async function DesignerProductsPage({ params }: DesignerProductsP
   await requireRole(["SUPER_ADMIN"]);
 
   const designer = await db.designerProfile.findUnique({
-    where: { id: params.id },
+    where: { id: params.id, isDeleted: false },
     include: { user: true }
   });
 
@@ -23,7 +23,7 @@ export default async function DesignerProductsPage({ params }: DesignerProductsP
 
   // Prisma types may not have isDeleted in ProductWhereInput if client is not regenerated. Use 'as any' to bypass type error for now.
   const products = await db.product.findMany({
-    where: { designerId: params.id, isDeleted: false } as any,
+    where: { designerId: params.id, isDeleted: false },
     include: { designer: true, images: true, votes: true, variants: true }
   });
 

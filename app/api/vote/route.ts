@@ -59,7 +59,7 @@ export async function POST(request: Request) {
   }
 
   const product = await db.product.findUnique({
-    where: { id: parsed.data.productId },
+    where: { id: parsed.data.productId, isDeleted: false },
     include: { designer: true }
   });
 

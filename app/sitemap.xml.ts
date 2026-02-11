@@ -38,7 +38,8 @@ export async function GET() {
     where: {
       isApproved: true,
       isVisible: true,
-      user: { isActive: true },
+      isDeleted: false,
+      user: { isActive: true }
     },
     select: {
       id: true,

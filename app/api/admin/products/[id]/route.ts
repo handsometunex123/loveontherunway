@@ -13,7 +13,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   }
 
   const product = await db.product.findUnique({
-    where: { id: params.id },
+    where: { id: params.id, isDeleted: false },
     include: { images: true, variants: true }
   });
 
@@ -24,7 +24,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   // Check permissions for designers
   if (session.user.role === "DESIGNER") {
     const designerProfile = await db.designerProfile.findUnique({
-      where: { userId: session.user.id }
+      where: { userId: session.user.id, isDeleted: false }
     });
 
     if (!designerProfile || product.designerId !== designerProfile.id) {
@@ -52,7 +52,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   }
 
   const existing = await db.product.findUnique({
-    where: { id: params.id }
+    where: { id: params.id, isDeleted: false }
   });
 
   if (!existing) {
@@ -61,7 +61,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 
   if (session.user.role === "DESIGNER") {
     const designerProfile = await db.designerProfile.findUnique({
-      where: { userId: session.user.id }
+      where: { userId: session.user.id, isDeleted: false }
     });
 
     if (!designerProfile || existing.designerId !== designerProfile.id) {
@@ -190,7 +190,7 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const existing = await db.product.findUnique({ where: { id: params.id } });
+  const existing = await db.product.findUnique({ where: { id: params.id, isDeleted: false } });
 
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -198,7 +198,7 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
 
   if (session.user.role === "DESIGNER") {
     const designerProfile = await db.designerProfile.findUnique({
-      where: { userId: session.user.id }
+      where: { userId: session.user.id, isDeleted: false }
     });
 
     if (!designerProfile || existing.designerId !== designerProfile.id) {

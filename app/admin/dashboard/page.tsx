@@ -14,17 +14,17 @@ export default async function DashboardPage() {
   let designerBrandName: string | null = null;
 
   if (isSuperAdmin) {
-    // Super admin sees all data
+    // Super admin sees all data (excluding deleted)
     [productCount, orderCount, voteCount, designerCount] = await Promise.all([
-      db.product.count(),
+      db.product.count({ where: { isDeleted: false } }),
       db.order.count(),
       db.vote.count(),
-      db.designerProfile.count()
+      db.designerProfile.count({ where: { isDeleted: false } })
     ]);
   } else {
     // Designer sees only their own data
     const designerProfile = await db.designerProfile.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: session.user.id, isDeleted: false },
       select: { id: true, brandLogo: true, brandName: true }
     });
 
@@ -36,7 +36,7 @@ export default async function DashboardPage() {
     if (designerProfile) {
       [productCount, orderCount, voteCount] = await Promise.all([
         db.product.count({
-          where: { designerId: designerProfile.id }
+          where: { designerId: designerProfile.id, isDeleted: false }
         }),
         db.orderItem.count({
           where: { designerId: designerProfile.id }
