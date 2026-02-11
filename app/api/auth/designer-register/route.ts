@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
           instagram: instagram || null,
           twitter: twitter || null,
           tiktok: tiktok || null,
-          isApproved: false, // Admin needs to approve
+          isApproved: true,
           isVisible: false, // Hidden until approved
         },
       });
