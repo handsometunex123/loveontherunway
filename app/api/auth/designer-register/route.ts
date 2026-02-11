@@ -12,6 +12,11 @@ const registrationSchema = z.object({
   phone: z.string().min(7, "Phone number must be at least 7 digits").max(20),
   brandName: z.string().min(2, "Brand name must be at least 2 characters"),
   bio: z.string().min(10, "Bio must be at least 10 characters"),
+  brandLogo: z.string().url().optional(),
+  website: z.string().url().optional(),
+  instagram: z.string().max(100).optional(),
+  twitter: z.string().max(100).optional(),
+  tiktok: z.string().max(100).optional(),
   inviteToken: z.string().min(20, "Invite token is required")
 });
 
@@ -31,7 +36,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, email, password, phone, brandName, bio, inviteToken } = validationResult.data;
+    const {
+      name,
+      email,
+      password,
+      phone,
+      brandName,
+      bio,
+      brandLogo,
+      website,
+      instagram,
+      twitter,
+      tiktok,
+      inviteToken
+    } = validationResult.data;
     const normalizedEmail = email.toLowerCase();
 
     const tokenHash = crypto.createHash("sha256").update(inviteToken).digest("hex");
@@ -92,6 +110,11 @@ export async function POST(request: NextRequest) {
           userId: user.id,
           brandName,
           bio,
+          brandLogo: brandLogo || null,
+          website: website || null,
+          instagram: instagram || null,
+          twitter: twitter || null,
+          tiktok: tiktok || null,
           isApproved: false, // Admin needs to approve
           isVisible: false, // Hidden until approved
         },

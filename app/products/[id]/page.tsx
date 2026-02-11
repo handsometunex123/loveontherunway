@@ -71,7 +71,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }
 
   const heroImage = product.images[0]?.url;
-  const price = typeof product.price === 'number' ? product.price : parseFloat(product.price.toString());
+  let price: number;
+  if (typeof product.price === 'object' && product.price !== null && 'toNumber' in product.price) {
+    price = product.price.toNumber();
+  } else if (typeof product.price === 'number') {
+    price = product.price;
+  } else if (typeof product.price === 'string') {
+    price = parseFloat(product.price);
+  } else {
+    price = 0;
+  }
 
   // JSON-LD Structured Data
   const productSchema = {

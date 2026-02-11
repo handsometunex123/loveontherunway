@@ -10,11 +10,11 @@ export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user || !session.user.isActive) {
+    if (session?.user && !session.user.isActive) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.role !== "DESIGNER") {
+    if (session?.user && session.user.role !== "DESIGNER") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

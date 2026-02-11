@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/context/ToastContext";
 import { ButtonLoader } from "@/components/Loader";
+import imageCompression from "browser-image-compression";
 
 type ProfileData = {
   name: string;
@@ -37,16 +38,34 @@ export default function ProfileForm({ initialProfile }: { initialProfile: Profil
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      showToast("Logo must be under 2MB", "error");
-      return;
-    }
-
     setUploadingLogo(true);
-    const formData = new FormData();
-    formData.append("file", file);
 
     try {
+      const compressionOptions = {
+        maxSizeMB: 1.8,
+        maxWidthOrHeight: 800,
+        useWebWorker: true
+      };
+
+      let compressedFile: File;
+
+      try {
+        const compressed = await imageCompression(file, compressionOptions);
+        compressedFile = new File([compressed], file.name, { type: compressed.type });
+      } catch (compressionError) {
+        console.error("Logo compression error:", compressionError);
+        showToast("Failed to compress logo. Please try a smaller image.", "error");
+        return;
+      }
+
+      if (compressedFile.size > 2 * 1024 * 1024) {
+        showToast("Logo must be under 2MB", "error");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", compressedFile);
+
       const response = await fetch("/api/upload-logo", {
         method: "POST",
         body: formData

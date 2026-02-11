@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/context/ToastContext";
-import PermanentDeleteModal from "./PermanentDeleteModal";
 
 interface DeleteModalProps {
   designer: {
@@ -14,10 +13,9 @@ interface DeleteModalProps {
     };
   };
   onClose: () => void;
-  onPermanentDelete: () => void;
 }
 
-export default function DeleteModal({ designer, onClose, onPermanentDelete }: DeleteModalProps) {
+export default function DeleteModal({ designer, onClose }: DeleteModalProps) {
   const router = useRouter();
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -91,12 +89,6 @@ export default function DeleteModal({ designer, onClose, onPermanentDelete }: De
             className="px-4 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 disabled:opacity-50"
           >
             {loading ? "Deleting..." : "Delete Designer"}
-          </button>
-          <button
-            onClick={onPermanentDelete}
-            className="px-4 py-2 rounded-lg bg-gray-300 text-gray-700 font-semibold hover:bg-gray-400"
-          >
-            Delete Permanently
           </button>
         </div>
       </div>
