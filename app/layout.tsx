@@ -119,6 +119,18 @@ export default async function RootLayout({
               <ToastContainer />
             </ToastProvider>
           </LoadingProvider>
+          <footer className="mt-auto">
+            <div className="opacity-90 hover:opacity-100 transition-opacity flex flex-col items-center">
+              <Image
+                src="/creator_logo.png"
+                alt="Creator Logo"
+                height={100}
+                width={100}
+                className="h-24 w-24 object-contain"
+              />
+              <span className="text-xs text-gray-600 -mt-6">Developed by AySync Labs</span>
+            </div>
+          </footer>
         </AuthProvider>
       </body>
     </html>

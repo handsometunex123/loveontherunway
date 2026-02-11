@@ -39,29 +39,8 @@ export default function AdminProductsPageClient({
   const [loading, setLoading] = useState(false);
   const canCreate = typeof showCreate === "boolean" ? showCreate : !isSuperAdmin;
 
-  // Fetch fresh data from API on mount
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch("/api/admin/products", {
-          cache: "no-store"
-        });
-        if (response.ok) {
-          const freshProducts = await response.json();
-          setProducts(freshProducts);
-        }
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
-        // Fall back to initial products if fetch fails
-        setProducts(initialProducts);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, [initialProducts]);
+  // Removed useEffect and fetch logic to make the component reusable
+  // The component now relies solely on the `products` prop passed to it
 
   const handleVisibilityToggle = async (productId: string, currentVisibility: boolean) => {
     setTogglingId(productId);

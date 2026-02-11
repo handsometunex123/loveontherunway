@@ -108,8 +108,8 @@ export default function DesignersClient({
                   : "bg-white border-slate-100 hover:shadow-md"
               }`}
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-start gap-3 flex-1">
+              <div className="flex items-start justify-between md:gap-3">
+                <div className="flex items-start gap-2 md:gap-3 flex-1">
                   {designer.brandLogo ? (
                     <img
                       src={designer.brandLogo}
@@ -122,14 +122,14 @@ export default function DesignersClient({
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-lg text-slate-900">
+                    <h3 className="font-bold text-base md:text-lg text-slate-900">
                       {designer.brandName}
                     </h3>
                     <p className="text-slate-500 text-sm">{designer.user.email}</p>
                   </div>
                 </div>
                 <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  className={`rounded-full px-3 py-1 text-xs -ml-2 md:ml-0 font-semibold ${
                     designer.isDeleted
                       ? "bg-rose-100 text-rose-700 border border-rose-300"
                       : designer.isApproved

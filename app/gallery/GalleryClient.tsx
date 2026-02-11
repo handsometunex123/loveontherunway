@@ -126,7 +126,7 @@ export default function GalleryClient({ groupedImages }: Props) {
 
                     {/* Overlay with event info */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-4 md:p-8">
-                      <h3 className="text-white text-xl md:text-3xl font-black mb-1 md:mb-2">Explore our previous collections</h3>
+                      <h3 className="text-white text-xl md:text-3xl font-black mb-1 md:mb-2">{eventName}</h3>
                       <div className="flex items-center gap-2 text-white/90 text-xs md:text-sm font-light">
                         <span className="inline-block w-2 h-2 bg-pink-500 rounded-full"></span>
                         <span>{eventImages.length} photos</span>
@@ -146,7 +146,7 @@ export default function GalleryClient({ groupedImages }: Props) {
 
                 {/* Event info - Right side */}
                 <div className="w-full md:flex-1 text-center md:text-left">
-                  <h3 className="text-2xl md:text-4xl font-black text-slate-900 mb-2 md:mb-4">Love On The Runway 2025</h3>
+                  <h3 className="text-2xl md:text-4xl font-black text-slate-900 mb-2 md:mb-4">{eventName}</h3>
                   <p className="text-slate-600 text-base md:text-lg mb-4 md:mb-6 leading-relaxed">
                     Explore stunning moments from this unforgettable event.
                   </p>

@@ -16,11 +16,12 @@ export default async function DesignerProductsPage({ params }: DesignerProductsP
   });
 
   if (!designer) {
+    console.error("Designer not found for ID:", params.id);
     notFound();
   }
 
   const products = await db.product.findMany({
-    where: { designerId: designer.id },
+    where: { designerId: params.id }, // Use params.id directly to ensure filtering
     include: { designer: true, images: true, votes: true, variants: true }
   });
 
@@ -30,6 +31,9 @@ export default async function DesignerProductsPage({ params }: DesignerProductsP
     votesCount: product.votes.length,
     variantsCount: product.variants.length
   }));
+
+  console.log(`Fetched ${products.length} products for designer ID: ${params.id}`);
+  console.log({productsWithCounts})
 
   return (
     <AdminProductsPageClient
