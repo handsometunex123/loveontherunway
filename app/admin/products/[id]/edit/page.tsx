@@ -37,7 +37,11 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
     id: product.id,
     name: product.name,
     description: product.description,
-    price: typeof product.price === "number" ? product.price : parseFloat(product.price.toString()),
+    price: typeof product.price === 'object' && product.price !== null && 'toNumber' in product.price
+      ? product.price.toNumber()
+      : typeof product.price === 'number'
+        ? product.price
+        : parseFloat(product.price),
     category: product.category as "MALE" | "FEMALE",
     isVisible: product.isVisible,
     images: product.images.map((img: any) => ({

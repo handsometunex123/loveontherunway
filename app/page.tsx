@@ -38,7 +38,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const currentPage = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
   const skip = (currentPage - 1) * ITEMS_PER_PAGE;
 
-  const [totalProducts, designers, products] = await Promise.all([
+  const [totalProducts, designers, productsRaw] = await Promise.all([
     db.product.count({
       where: {
         isVisible: true,
@@ -83,6 +83,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       take: ITEMS_PER_PAGE
     })
   ]);
+
+  // Serialize Decimal fields in products
+  const products = productsRaw.map((product: any) => ({
+    ...product,
+    price: typeof product.price === 'object' && product.price !== null && 'toNumber' in product.price
+      ? product.price.toNumber()
+      : product.price
+  }));
 
   const totalPages = Math.ceil(totalProducts / ITEMS_PER_PAGE);
   const startItem = totalProducts === 0 ? 0 : skip + 1;
@@ -219,8 +227,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <div className="mt-16">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
           <div>
-            <h2 className="text-3xl md:text-4xl font-black mb-2 text-slate-900">Celebrated Designers of 2025</h2>
-            <p className="text-slate-600">The visionary creatives who made last year's event an extraordinary success. Their talent and dedication brought the runway to life.</p>
+            <h2 className="text-3xl md:text-4xl font-black mb-2 text-slate-900">Top Designers of 2026</h2>
+            <p className="text-slate-600">View all designers rocking the runway this year.</p>
           </div>
           <Link href="/designers" className="text-purple-600 hover:text-purple-700 font-semibold">
             View all designers →

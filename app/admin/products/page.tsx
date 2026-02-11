@@ -26,7 +26,11 @@ export default async function AdminProductsPage() {
 
   const productsWithCounts = products.map((product: typeof products[number]) => ({
     ...product,
-    price: Number(product.price),
+    price: typeof product.price === 'object' && product.price !== null && 'toNumber' in product.price
+      ? product.price.toNumber()
+      : typeof product.price === 'number'
+        ? product.price
+        : parseFloat(product.price),
     votesCount: product.votes.length,
     variantsCount: product.variants.length
   }));

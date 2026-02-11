@@ -147,7 +147,12 @@ export default async function DesignersPage() {
             <div className="flex-1 p-6 md:p-8 overflow-hidden">
               <DesignerProductCarousel
                 designerId={designer.id}
-                products={designer.products}
+                products={designer.products.map((product: any) => ({
+                  ...product,
+                  price: typeof product.price === 'object' && product.price !== null && 'toNumber' in product.price
+                    ? product.price.toNumber()
+                    : product.price
+                }))}
               />
             </div>
 

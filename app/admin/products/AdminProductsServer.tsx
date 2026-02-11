@@ -20,7 +20,11 @@ export default async function AdminProductsPage() {
   const serializedProducts = products.map((product: (typeof products)[number]) => ({
     id: product.id,
     name: product.name,
-    price: Number(product.price),
+    price: typeof product.price === 'object' && product.price !== null && 'toNumber' in product.price
+      ? product.price.toNumber()
+      : typeof product.price === 'number'
+        ? product.price
+        : parseFloat(product.price),
     isVisible: product.isVisible,
     designer: { 
       brandName: product.designer.brandName,
