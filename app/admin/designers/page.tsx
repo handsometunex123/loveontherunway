@@ -7,17 +7,35 @@ import BackButton from "@/app/BackButton";
 export default async function AdminDesignersPage() {
   await requireRole(["SUPER_ADMIN"]);
 
-  const designers = await db.designerProfile.findMany({
+
+  function serializeProducts(products: any[]) {
+    return products.map(product => ({
+      ...product,
+      price: typeof product.price === 'object' && product.price !== null && 'toNumber' in product.price
+        ? product.price.toNumber()
+        : product.price
+    }));
+  }
+
+  const designersRaw = await db.designerProfile.findMany({
     where: { isDeleted: false },
     include: { user: true, products: true },
     orderBy: [{ isApproved: "desc" }, { createdAt: "desc" }]
   });
+  const designers = designersRaw.map(designer => ({
+    ...designer,
+    products: serializeProducts(designer.products)
+  }));
 
-  const deletedDesigners = await db.designerProfile.findMany({
+  const deletedDesignersRaw = await db.designerProfile.findMany({
     where: { isDeleted: true },
     include: { user: true, products: true },
     orderBy: [{ createdAt: "desc" }]
   });
+  const deletedDesigners = deletedDesignersRaw.map(designer => ({
+    ...designer,
+    products: serializeProducts(designer.products)
+  }));
 
   const designerStats = await db.designerProfile.findMany({
     select: { isApproved: true, isVisible: true, isDeleted: true }

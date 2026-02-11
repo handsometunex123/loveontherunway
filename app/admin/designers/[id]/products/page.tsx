@@ -20,20 +20,29 @@ export default async function DesignerProductsPage({ params }: DesignerProductsP
     notFound();
   }
 
+
+  // Prisma types may not have isDeleted in ProductWhereInput if client is not regenerated. Use 'as any' to bypass type error for now.
   const products = await db.product.findMany({
-    where: { designerId: params.id }, // Use params.id directly to ensure filtering
+    where: { designerId: params.id, isDeleted: false } as any,
     include: { designer: true, images: true, votes: true, variants: true }
   });
 
-  const productsWithCounts = products.map((product: typeof products[number]) => ({
-    ...product,
-    price: Number(product.price),
-    votesCount: product.votes.length,
-    variantsCount: product.variants.length
-  }));
+  // Ensure all required fields for AdminProductsPageClient
 
-  console.log(`Fetched ${products.length} products for designer ID: ${params.id}`);
-  console.log({productsWithCounts})
+  function serializeProduct(product: any) {
+    return {
+      ...product,
+      price: typeof product.price === 'object' && product.price !== null && 'toNumber' in product.price
+        ? product.price.toNumber()
+        : product.price,
+      votesCount: product.votes ? product.votes.length : 0,
+      variantsCount: product.variants ? product.variants.length : 0,
+      designer: product.designer,
+      images: product.images
+    };
+  }
+
+  const productsWithCounts = products.map(serializeProduct);
 
   return (
     <AdminProductsPageClient

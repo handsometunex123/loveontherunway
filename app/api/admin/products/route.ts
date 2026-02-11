@@ -26,23 +26,31 @@ export async function GET() {
     }
 
     products = await db.product.findMany({
-      where: { designerId: designerProfile.id },
+      where: { designerId: designerProfile.id, isDeleted: false },
       include: { designer: true, images: true, votes: true, variants: true },
       orderBy: { createdAt: 'desc' }
     });
   } else if (session.user.role === "SUPER_ADMIN") {
     products = await db.product.findMany({
+      where: { isDeleted: false },
       include: { designer: true, images: true, votes: true, variants: true },
       orderBy: { createdAt: 'desc' }
     });
   }
 
-  const productsWithCounts = products?.map((product: any) => ({
-    ...product,
-    price: Number(product.price),
-    votesCount: product.votes.length,
-    variantsCount: product.variants.length
-  }));
+
+  function serializeProduct(product: any) {
+    return {
+      ...product,
+      price: typeof product.price === 'object' && product.price !== null && 'toNumber' in product.price
+        ? product.price.toNumber()
+        : product.price,
+      votesCount: product.votes.length,
+      variantsCount: product.variants.length
+    };
+  }
+
+  const productsWithCounts = products?.map(serializeProduct);
 
   return NextResponse.json(productsWithCounts || []);
 }

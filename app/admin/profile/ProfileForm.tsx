@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ButtonLoader } from "@/components/Loader";
+import imageCompression from "browser-image-compression";
 
 type ProfileData = {
   name: string;
@@ -35,17 +36,35 @@ export default function ProfileForm({ initialProfile }: { initialProfile: Profil
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      setError("Logo must be under 2MB");
-      return;
-    }
-
     setUploadingLogo(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", "lotr_logos");
 
     try {
+      const compressionOptions = {
+        maxSizeMB: 1.8,
+        maxWidthOrHeight: 800,
+        useWebWorker: true
+      };
+
+      let compressedFile: File;
+
+      try {
+        const compressed = await imageCompression(file, compressionOptions);
+        compressedFile = new File([compressed], file.name, { type: compressed.type });
+      } catch (compressionError) {
+        console.error("Logo compression error:", compressionError);
+        setError("Failed to compress logo");
+        return;
+      }
+
+      if (compressedFile.size > 2 * 1024 * 1024) {
+        setError("Logo must be under 2MB");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", compressedFile);
+      formData.append("upload_preset", "lotr_logos");
+
       const res = await fetch(
         `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
         {
@@ -60,7 +79,9 @@ export default function ProfileForm({ initialProfile }: { initialProfile: Profil
       setError(null);
     } catch (err) {
       console.error(err);
-      setError("Failed to upload logo");
+      if (!error) {
+        setError("Failed to upload logo");
+      }
     } finally {
       setUploadingLogo(false);
     }

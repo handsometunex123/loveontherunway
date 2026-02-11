@@ -1,4 +1,75 @@
+
 "use client";
+
+
+import { FaInstagram, FaTwitter, FaTiktok, FaGlobe, FaPhoneAlt, FaUser, FaEnvelope, FaRegIdBadge } from "react-icons/fa";
+
+function DesignerProfileModal({ designer, open, onClose }: { designer: any; open: boolean; onClose: () => void }) {
+  if (!open || !designer) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-xl w-full p-0 relative border border-slate-100">
+        <button
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-2xl font-bold rounded-full p-2 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-300"
+          onClick={onClose}
+          aria-label="Close"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+        </button>
+        <div className="flex flex-col items-center gap-4 pt-8 pb-4 px-8">
+          {designer.brandLogo ? (
+            <img src={designer.brandLogo} alt={`${designer.brandName} logo`} className="h-24 w-24 object-cover rounded-xl border-2 border-slate-200 shadow-sm bg-white" />
+          ) : (
+            <div className="h-24 w-24 rounded-xl bg-slate-200 flex items-center justify-center text-slate-700 font-extrabold text-3xl border-2 border-slate-200 shadow-sm">
+              {designer.brandName.slice(0, 2).toUpperCase()}
+            </div>
+          )}
+          <h2 className="font-extrabold text-2xl md:text-3xl text-slate-900 text-center tracking-tight mt-2">{designer.brandName}</h2>
+          <div className="flex items-center gap-2 text-slate-500 text-sm">
+            <FaEnvelope className="inline-block mr-1" />
+            <span>{designer.user.email}</span>
+          </div>
+        </div>
+        <div className="border-t border-slate-100 mx-8" />
+        <div className="mt-6 space-y-3 px-8 pb-2">
+          <div className="flex items-center gap-2 text-slate-700"><FaUser className="text-slate-400" /><span className="font-semibold">Full Name:</span> <span className="font-normal">{designer.user.name}</span></div>
+          <div className="flex items-center gap-2 text-slate-700"><FaPhoneAlt className="text-slate-400" /><span className="font-semibold">Phone:</span> <span className="font-normal">{designer.user.phone}</span></div>
+          <div className="flex items-start gap-2 text-slate-700"><FaRegIdBadge className="text-slate-400 mt-1" /><span className="font-semibold">Bio:</span> <span className="font-normal">{designer.bio || <span className="italic text-slate-400">No bio</span>}</span></div>
+          <div className="flex flex-wrap gap-3 mt-2">
+            {designer.website && (
+              <a href={designer.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 text-purple-700 font-medium text-xs hover:bg-purple-50 transition">
+                <FaGlobe /> Website
+              </a>
+            )}
+            {designer.instagram && (
+              <a href={`https://instagram.com/${designer.instagram.replace('@','')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 text-pink-600 font-medium text-xs hover:bg-pink-50 transition">
+                <FaInstagram /> Instagram
+              </a>
+            )}
+            {designer.twitter && (
+              <a href={`https://twitter.com/${designer.twitter.replace('@','')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 text-sky-600 font-medium text-xs hover:bg-sky-50 transition">
+                <FaTwitter /> Twitter/X
+              </a>
+            )}
+            {designer.tiktok && (
+              <a href={`https://tiktok.com/@${designer.tiktok.replace('@','')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 text-black font-medium text-xs hover:bg-slate-100 transition">
+                <FaTiktok /> TikTok
+              </a>
+            )}
+          </div>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="font-semibold text-slate-700">Status:</span>
+            <span className={`rounded-full px-3 py-1 text-xs font-semibold border ${designer.isDeleted ? "bg-rose-50 text-rose-700 border-rose-200" : designer.isApproved ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-amber-50 text-amber-700 border-amber-200"}`}>{designer.isDeleted ? 'Deleted' : designer.isApproved ? 'Approved' : 'Pending'}</span>
+            {!designer.isVisible && !designer.isDeleted && <span className="ml-2 text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded">Hidden</span>}
+          </div>
+        </div>
+        <div className="mt-8 flex justify-end px-8 pb-8">
+          <button onClick={onClose} className="px-5 py-2 rounded-xl bg-slate-900 text-white font-semibold shadow hover:bg-slate-800 transition text-base">Close</button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 import { useState } from "react";
 import Link from "next/link";
@@ -72,8 +143,10 @@ export default function DesignersClient({
     return `${baseStyles} border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300`;
   };
 
+  const [modalDesigner, setModalDesigner] = useState<any | null>(null);
   return (
     <>
+      <DesignerProfileModal designer={modalDesigner} open={!!modalDesigner} onClose={() => setModalDesigner(null)} />
       <div className="flex flex-wrap gap-3 mb-6">
         {filters.map((filter) => (
           <button
@@ -109,15 +182,22 @@ export default function DesignersClient({
               }`}
             >
               <div className="flex items-start justify-between md:gap-3">
-                <div className="flex items-start gap-2 md:gap-3 flex-1">
+                <div
+                  className="flex items-start gap-2 md:gap-3 flex-1 cursor-pointer group"
+                  onClick={() => setModalDesigner(designer)}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Show profile for ${designer.brandName}`}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setModalDesigner(designer); }}
+                >
                   {designer.brandLogo ? (
                     <img
                       src={designer.brandLogo}
                       alt={`${designer.brandName} logo`}
-                      className="h-12 w-12 object-cover rounded-lg border border-slate-200 flex-shrink-0"
+                      className="h-12 w-12 object-cover rounded-lg border border-slate-200 flex-shrink-0 group-hover:scale-105 transition-transform"
                     />
                   ) : (
-                    <div className="h-12 w-12 rounded-lg bg-slate-200 flex items-center justify-center text-slate-700 font-bold flex-shrink-0">
+                    <div className="h-12 w-12 rounded-lg bg-slate-200 flex items-center justify-center text-slate-700 font-bold flex-shrink-0 group-hover:scale-105 transition-transform">
                       {designer.brandName.slice(0, 2).toUpperCase()}
                     </div>
                   )}

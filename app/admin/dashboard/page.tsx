@@ -160,7 +160,7 @@ export default async function DashboardPage() {
         </Link>
 
         {/* Votes Card */}
-        {isSuperAdmin ? (
+        {/* {isSuperAdmin ? (
           <div className="rounded-2xl border border-slate-200 bg-white p-4 md:p-6">
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs font-bold uppercase tracking-widest text-slate-600">Votes</p>
@@ -184,10 +184,10 @@ export default async function DashboardPage() {
               <p className="text-xs text-slate-500 mt-2">Audience engagement</p>
             </div>
           </Link>
-        )}
+        )} */}
 
         {/* Role Card - Not Clickable */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 md:p-6">
+        {/* <div className="rounded-2xl border border-slate-200 bg-white p-4 md:p-6">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs font-bold uppercase tracking-widest text-slate-600">Role</p>
             <div className="h-8 w-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 text-lg">
@@ -196,7 +196,7 @@ export default async function DashboardPage() {
           </div>
           <p className="text-2xl md:text-3xl font-bold text-slate-900">{isSuperAdmin ? "Admin" : "Designer"}</p>
           <p className="text-xs text-slate-500 mt-2">Access level</p>
-        </div>
+        </div> */}
       </div>
 
       {/* Quick Actions */}
