@@ -5,23 +5,24 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: [
-          '/',
-          '/designers',
-          '/designers/*',
-          '/products/*',
-          '/vote',
-          '/login'
-        ],
+        allow: '/',
         disallow: [
+          '/admin',
           '/admin/*',
+          '/api',
           '/api/*',
           '/cart',
           '/checkout',
-          '/order-confirmation/*'
+          '/order-confirmation',
+          '/order-confirmation/*',
+          '/profile',
+          '/settings',
+          '/auth',
+          '/auth/*',
+          '/login',
         ],
       },
     ],
     sitemap: 'https://loveontherunway.com/sitemap.xml',
-  }
+  };
 }

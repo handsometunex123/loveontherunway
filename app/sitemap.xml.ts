@@ -1,13 +1,12 @@
-import { MetadataRoute } from 'next'
-import { db } from '@/lib/db'
+import { db } from '@/lib/db';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://loveontherunway.com'
+export async function GET() {
+  const baseUrl = 'https://loveontherunway.com';
 
   // Static routes
-  const staticRoutes: MetadataRoute.Sitemap = [
+  const staticRoutes = [
     {
       url: baseUrl,
       lastModified: new Date(),
@@ -32,50 +31,62 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.5,
     },
-  ]
+  ];
 
   // Get all visible designers
   const designers = await db.designerProfile.findMany({
     where: {
       isApproved: true,
       isVisible: true,
-      user: { isActive: true }
+      user: { isActive: true },
     },
     select: {
       id: true,
       updatedAt: true,
-    }
-  })
+    },
+  });
 
-  const designerRoutes: MetadataRoute.Sitemap = designers.map((designer: any) => ({
+  const designerRoutes = designers.map((designer: any) => ({
     url: `${baseUrl}/designers/${designer.id}`,
     lastModified: designer.updatedAt,
     changeFrequency: 'weekly',
-    priority: 0.8,
-  }))
+    priority: 0.7,
+  }));
 
   // Get all visible products
   const products = await db.product.findMany({
     where: {
       isVisible: true,
+      isDeleted: false,
       designer: {
         isApproved: true,
         isVisible: true,
-        user: { isActive: true }
-      }
+        user: { isActive: true },
+      },
     },
     select: {
       id: true,
       updatedAt: true,
-    }
-  })
+    },
+  });
 
-  const productRoutes: MetadataRoute.Sitemap = products.map((product: any) => ({
+  const productRoutes = products.map((product: any) => ({
     url: `${baseUrl}/products/${product.id}`,
     lastModified: product.updatedAt,
     changeFrequency: 'weekly',
-    priority: 0.7,
-  }))
+    priority: 0.6,
+  }));
 
-  return [...staticRoutes, ...designerRoutes, ...productRoutes]
+  const allRoutes = [...staticRoutes, ...designerRoutes, ...productRoutes];
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n` +
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` +
+    allRoutes.map(route => `\n  <url>\n    <loc>${route.url}</loc>\n    <lastmod>${new Date(route.lastModified).toISOString()}</lastmod>\n    <changefreq>${route.changeFrequency}</changefreq>\n    <priority>${route.priority}</priority>\n  </url>`).join('') +
+    '\n</urlset>';
+
+  return new Response(xml, {
+    headers: {
+      'Content-Type': 'application/xml',
+    },
+  });
 }
