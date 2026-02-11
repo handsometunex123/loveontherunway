@@ -58,17 +58,32 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     }
   }
 
-  const designer = await db.designerProfile.update({
-    where: { id: params.id },
-    data: {
-      isApproved: parsed.data.isApproved,
-      isVisible: parsed.data.isVisible
-    },
-    include: { user: true }
+  // If revoked, also deactivate the user account
+  const designer = await db.$transaction(async (tx) => {
+    const updatedDesigner = await tx.designerProfile.update({
+      where: { id: params.id },
+      data: {
+        isApproved: parsed.data.isApproved,
+        isVisible: parsed.data.isVisible
+      },
+      include: { user: true }
+    });
+    if (parsed.data.isApproved === false) {
+      await tx.user.update({
+        where: { id: updatedDesigner.userId },
+        data: { isActive: false }
+      });
+    } else if (parsed.data.isApproved === true) {
+      await tx.user.update({
+        where: { id: updatedDesigner.userId },
+        data: { isActive: true }
+      });
+    }
+    return updatedDesigner;
   });
 
   // Send approval email
-  if (parsed.data.isApproved === true) {
+  if (parsed.data.isApproved === true && designer && designer.user) {
     const loginUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/login`;
     await sendEmail({
       to: designer.user.email,
@@ -151,7 +166,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   }
 
   // Send revocation email
-  if (parsed.data.isApproved === false && parsed.data.revocationReason) {
+  if (parsed.data.isApproved === false && parsed.data.revocationReason && designer && designer.user) {
     await sendEmail({
       to: designer.user.email,
       subject: "Update on Your Designer Account",
@@ -251,14 +266,36 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
   }
 
   try {
-    await db.designerProfile.update({
-      where: { id: params.id },
-      data: { isDeleted: true }
-    });
-
-    return NextResponse.json({ message: "Designer marked as deleted" });
+    const designerId = params.id;
+    const designerExists = await db.designerProfile.findUnique({ where: { id: designerId }, include: { user: true } });
+    if (!designerExists) {
+      return NextResponse.json({ error: "Designer not found." }, { status: 404 });
+    }
+    if (!designerExists.user) {
+      return NextResponse.json({ error: "User record for designer not found." }, { status: 404 });
+    }
+    await db.$transaction([
+      db.product.updateMany({
+        where: { designerId },
+        data: { isDeleted: { set: true } }
+      }),
+      db.designerProfile.update({
+        where: { id: designerId },
+        data: { isDeleted: true }
+      }),
+      db.user.update({
+        where: { id: designerExists.user.id },
+        data: { isActive: false }
+      })
+    ]);
+    return NextResponse.json({ message: "Designer permanently deleted successfully." });
   } catch (error) {
-    console.error("Error marking designer as deleted:", error);
-    return NextResponse.json({ error: "Failed to delete designer" }, { status: 500 });
+    console.error("Error permanently deleting designer:", error);
+    if (error instanceof (await import("@prisma/client")).Prisma.PrismaClientKnownRequestError) {
+      if ((error as any).code === 'P2025') {
+        return NextResponse.json({ error: "Designer not found." }, { status: 404 });
+      }
+    }
+    return NextResponse.json({ error: "Failed to permanently delete designer." }, { status: 500 });
   }
 }

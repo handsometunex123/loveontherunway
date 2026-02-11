@@ -82,7 +82,7 @@ export default function AdminProductsPageClient({
       });
 
       if (response.ok) {
-        setProducts(products.filter(p => p.id !== productId));
+        setProducts(products => products.filter(p => p.id !== productId));
         showToast(`"${productName}" deleted successfully`, "success");
       } else {
         const data = await response.json();

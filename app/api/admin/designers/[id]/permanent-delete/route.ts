@@ -15,11 +15,20 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       return NextResponse.json({ error: "User record for designer not found." }, { status: 404 });
     }
 
-    // Delete designer and related data
+    // Soft delete products, then hard delete designer and user
     await db.$transaction([
-      db.product.deleteMany({ where: { designerId } }),
-      db.designerProfile.delete({ where: { id: designerId } }),
-      db.user.delete({ where: { id: designerExists.user.id } })
+      db.product.updateMany({
+        where: { designerId },
+        data: { isDeleted: { set: true } }
+      }),
+      db.designerProfile.update({
+        where: { id: designerId },
+        data: { isDeleted: true }
+      }),
+      db.user.update({
+        where: { id: designerExists.user.id },
+        data: { isActive: false }
+      })
     ]);
 
     return NextResponse.json({ message: "Designer permanently deleted successfully." });

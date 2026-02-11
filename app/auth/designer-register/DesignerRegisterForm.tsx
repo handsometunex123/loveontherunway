@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/context/ToastContext";
 import { ButtonLoader } from "@/components/Loader";
+import imageCompression from "browser-image-compression";
 
 export default function DesignerRegisterForm({
   inviteEmail,
@@ -20,8 +21,68 @@ export default function DesignerRegisterForm({
   const [phone, setPhone] = useState("");
   const [brandName, setBrandName] = useState("");
   const [bio, setBio] = useState("");
+  const [brandLogo, setBrandLogo] = useState("");
+  const [website, setWebsite] = useState("");
+  const [instagram, setInstagram] = useState("");
+  const [twitter, setTwitter] = useState("");
+  const [tiktok, setTiktok] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const router = useRouter();
+
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadingLogo(true);
+
+    try {
+      const compressionOptions = {
+        maxSizeMB: 1.8,
+        maxWidthOrHeight: 800,
+        useWebWorker: true
+      };
+
+      let compressedFile: File;
+
+      try {
+        const compressed = await imageCompression(file, compressionOptions);
+        compressedFile = new File([compressed], file.name, { type: compressed.type });
+      } catch (compressionError) {
+        console.error("Logo compression error:", compressionError);
+        showToast("Failed to compress logo. Please try a smaller image.", "error");
+        return;
+      }
+
+      if (compressedFile.size > 2 * 1024 * 1024) {
+        showToast("Logo must be under 2MB", "error");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", compressedFile);
+
+      const response = await fetch("/api/upload-logo", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        showToast(data.error || "Failed to upload logo", "error");
+        return;
+      }
+
+      setBrandLogo(data.url);
+      showToast("Logo uploaded successfully", "success");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to upload logo", "error");
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
 
   const validateForm = (): string | null => {
     if (!name.trim()) return "Name is required";
@@ -64,6 +125,11 @@ export default function DesignerRegisterForm({
           phone: phone.trim(),
           brandName: brandName.trim(),
           bio: bio.trim(),
+          brandLogo: brandLogo || undefined,
+          website: website.trim() || undefined,
+          instagram: instagram.trim() || undefined,
+          twitter: twitter.trim() || undefined,
+          tiktok: tiktok.trim() || undefined,
           inviteToken
         }),
       });
@@ -187,6 +253,53 @@ export default function DesignerRegisterForm({
         />
       </div>
 
+      {/* Brand Logo Input */}
+      <div>
+        <label htmlFor="brandLogo" className="block text-xs md:text-sm font-medium text-slate-700 mb-1">
+          Brand Logo
+        </label>
+        <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-3">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center">
+            <div className="h-16 w-16 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden">
+              {brandLogo ? (
+                <img src={brandLogo} alt="Brand Logo" className="h-full w-full object-cover" />
+              ) : (
+                <span className="text-xs text-slate-400">No logo</span>
+              )}
+            </div>
+            <div className="flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <label
+                  htmlFor="brandLogo"
+                  className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-widest text-white cursor-pointer hover:bg-slate-800"
+                >
+                  {uploadingLogo ? "Uploading..." : brandLogo ? "Replace logo" : "Upload logo"}
+                </label>
+                <input
+                  id="brandLogo"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  disabled={uploadingLogo}
+                  className="sr-only"
+                />
+                {brandLogo && (
+                  <button
+                    type="button"
+                    onClick={() => setBrandLogo("")}
+                    className="inline-flex items-center rounded-full border border-slate-200 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white"
+                  >
+                    Remove logo
+                  </button>
+                )}
+                {uploadingLogo && <ButtonLoader size="sm" />}
+              </div>
+              <p className="text-xs text-slate-500 mt-2">Max 2MB. Recommended 200x200px. PNG or JPG.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Bio Input */}
       <div>
         <label htmlFor="bio" className="block text-xs md:text-sm font-medium text-slate-700 mb-1">
@@ -202,6 +315,70 @@ export default function DesignerRegisterForm({
           disabled={isLoading}
         />
         <p className="text-xs text-slate-500 mt-1">Minimum 10 characters</p>
+      </div>
+
+      {/* Website Input */}
+      <div>
+        <label htmlFor="website" className="block text-xs md:text-sm font-medium text-slate-700 mb-1">
+          Website
+        </label>
+        <input
+          id="website"
+          type="url"
+          placeholder="https://yourwebsite.com"
+          value={website}
+          onChange={(e) => setWebsite(e.target.value)}
+          className="w-full rounded-lg border border-slate-300 px-3 md:px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+          disabled={isLoading}
+        />
+      </div>
+
+      {/* Instagram Input */}
+      <div>
+        <label htmlFor="instagram" className="block text-xs md:text-sm font-medium text-slate-700 mb-1">
+          Instagram Handle
+        </label>
+        <input
+          id="instagram"
+          type="text"
+          placeholder="@yourhandle"
+          value={instagram}
+          onChange={(e) => setInstagram(e.target.value)}
+          className="w-full rounded-lg border border-slate-300 px-3 md:px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+          disabled={isLoading}
+        />
+      </div>
+
+      {/* Twitter Input */}
+      <div>
+        <label htmlFor="twitter" className="block text-xs md:text-sm font-medium text-slate-700 mb-1">
+          Twitter/X Handle
+        </label>
+        <input
+          id="twitter"
+          type="text"
+          placeholder="@yourhandle"
+          value={twitter}
+          onChange={(e) => setTwitter(e.target.value)}
+          className="w-full rounded-lg border border-slate-300 px-3 md:px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+          disabled={isLoading}
+        />
+      </div>
+
+      {/* TikTok Input */}
+      <div>
+        <label htmlFor="tiktok" className="block text-xs md:text-sm font-medium text-slate-700 mb-1">
+          TikTok Handle
+        </label>
+        <input
+          id="tiktok"
+          type="text"
+          placeholder="@yourhandle"
+          value={tiktok}
+          onChange={(e) => setTiktok(e.target.value)}
+          className="w-full rounded-lg border border-slate-300 px-3 md:px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+          disabled={isLoading}
+        />
       </div>
 
       {/* Submit Button */}

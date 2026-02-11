@@ -7,7 +7,6 @@ import ApprovalModal from "./ApprovalModal";
 import RevokeModal from "./RevokeModal";
 import DeleteModal from "./DeleteModal";
 import ReinstateModal from "./ReinstateModal";
-import PermanentDeleteModal from "./PermanentDeleteModal";
 
 export default function DesignerActions({ designer }: { designer: any }) {
   const router = useRouter();
@@ -17,7 +16,6 @@ export default function DesignerActions({ designer }: { designer: any }) {
   const [showRevokeModal, setShowRevokeModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showReinstateModal, setShowReinstateModal] = useState(false);
-  const [showPermanentDeleteModal, setShowPermanentDeleteModal] = useState(false);
 
   const handleApprovalClick = () => {
     if (designer.isApproved) {
@@ -56,9 +54,6 @@ export default function DesignerActions({ designer }: { designer: any }) {
     setShowDeleteModal(true);
   };
 
-  const handlePermanentDeleteClick = () => {
-    setShowPermanentDeleteModal(true);
-  };
 
   return (
     <>
@@ -119,16 +114,9 @@ export default function DesignerActions({ designer }: { designer: any }) {
           <DeleteModal
             designer={designer}
             onClose={() => setShowDeleteModal(false)}
-            onPermanentDelete={handlePermanentDeleteClick}
           />
         )}
 
-      {showPermanentDeleteModal && (
-        <PermanentDeleteModal
-          designer={designer}
-          onClose={() => setShowPermanentDeleteModal(false)}
-        />
-      )}
 
       {showReinstateModal && (
         <ReinstateModal designer={designer} onClose={() => setShowReinstateModal(false)} />

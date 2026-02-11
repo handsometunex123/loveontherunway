@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/context/ToastContext";
 import Select from "@/app/components/Select";
 import Loader, { ButtonLoader } from "@/components/Loader";
+import imageCompression from "browser-image-compression";
 
 // Image upload constants
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB per image
@@ -279,11 +280,33 @@ export default function ProductForm({
     }
 
     setUploading(true);
-    setUploadProgress(`Uploading ${valid.length} image${valid.length !== 1 ? 's' : ''}...`);
+    setUploadProgress("Compressing images...");
 
     try {
+      const compressionOptions = {
+        maxSizeMB: 4.5,
+        maxWidthOrHeight: 2000,
+        useWebWorker: true
+      };
+
+      const compressedFiles: File[] = [];
+
+      for (const file of valid) {
+        try {
+          const compressed = await imageCompression(file, compressionOptions);
+          const compressedFile = new File([compressed], file.name, { type: compressed.type });
+          compressedFiles.push(compressedFile);
+        } catch (compressionError) {
+          console.error(`Failed to compress ${file.name}:`, compressionError);
+          showToast(`Failed to compress ${file.name}. Please try a smaller image.`, "error");
+          throw compressionError;
+        }
+      }
+
+      setUploadProgress(`Uploading ${compressedFiles.length} image${compressedFiles.length !== 1 ? 's' : ''}...`);
+
       const formData = new FormData();
-      valid.forEach(file => formData.append("files", file));
+      compressedFiles.forEach(file => formData.append("files", file));
 
       const response = await fetch("/api/upload", {
         method: "POST",

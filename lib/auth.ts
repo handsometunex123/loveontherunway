@@ -23,10 +23,20 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const user = await db.user.findUnique({ where: { email } });
+        const user = await db.user.findUnique({
+          where: { email },
+          include: { designerProfile: true }
+        });
 
         if (!user || !user.isActive) {
           return null;
+        }
+
+        // If user is a designer, block login if not approved or deleted
+        if (user.role === "DESIGNER") {
+          if (!user.designerProfile?.isApproved || user.designerProfile.isDeleted) {
+            return null;
+          }
         }
 
         const isValid = await bcrypt.compare(password, user.password);

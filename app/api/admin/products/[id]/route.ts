@@ -34,7 +34,9 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
 
   return NextResponse.json({
     ...product,
-    price: Number(product.price)
+    price: typeof product.price === 'object' && product.price !== null && 'toNumber' in product.price
+      ? product.price.toNumber()
+      : product.price
   });
 }
 
@@ -204,7 +206,6 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
     }
   }
 
-  await db.product.delete({ where: { id: params.id } });
-
+  await db.product.update({ where: { id: params.id }, data: { isDeleted: true } });
   return NextResponse.json({ ok: true });
 }
