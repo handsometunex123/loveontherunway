@@ -38,7 +38,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const currentPage = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
   const skip = (currentPage - 1) * ITEMS_PER_PAGE;
 
-  const [totalProducts, designers, productsRaw] = await Promise.all([
+  // Fetch all eligible designers and their visible products
+  const [totalProducts, designers] = await Promise.all([
     db.product.count({
       where: {
         isVisible: true,
@@ -59,44 +60,53 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       include: {
         user: true,
         products: {
-          where: { isVisible: true },
-          include: { images: true }
+          where: { isVisible: true, isDeleted: false },
+          include: { images: true, designer: { include: { user: true } } }
         }
       },
-      orderBy: { createdAt: "desc" },
-      take: 6
-    }),
-    db.product.findMany({
-      where: {
-        isVisible: true,
-        isDeleted: false,
-        designer: {
-          isApproved: true,
-          isVisible: true,
-          user: { isActive: true }
-        }
-      },
-      include: {
-        images: true,
-        designer: { include: { user: true } }
-      },
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: ITEMS_PER_PAGE
+      orderBy: { createdAt: "desc" }
     })
   ]);
 
-  // Serialize Decimal fields in products
-  const products = productsRaw.map((product: any) => ({
-    ...product,
-    price: typeof product.price === 'object' && product.price !== null && 'toNumber' in product.price
-      ? product.price.toNumber()
-      : product.price
-  }));
+  // 1. Select one random product per designer
+  let selectedProducts: any[] = [];
+  let allProducts: any[] = [];
+  designers.forEach((designer: any) => {
+    if (designer.products && designer.products.length > 0) {
+      // Pick a random product for this designer
+      const idx = Math.floor(Math.random() * designer.products.length);
+      selectedProducts.push(designer.products[idx]);
+      allProducts.push(...designer.products);
+    }
+  });
 
+  // 2. Remove duplicates from allProducts
+  const selectedIds = new Set(selectedProducts.map((p) => p.id));
+  const remainingProducts = allProducts.filter((p) => !selectedIds.has(p.id));
+
+  // 3. Shuffle remainingProducts
+  function shuffle<T>(array: T[]): T[] {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+  shuffle(remainingProducts);
+
+  // 4. Fill up to ITEMS_PER_PAGE
+  let products = [...selectedProducts];
+  for (let i = 0; products.length < ITEMS_PER_PAGE && i < remainingProducts.length; i++) {
+    products.push(remainingProducts[i]);
+  }
+  products = shuffle(products);
+
+  // Calculate pagination info for UI
   const totalPages = Math.ceil(totalProducts / ITEMS_PER_PAGE);
   const startItem = totalProducts === 0 ? 0 : skip + 1;
   const endItem = Math.min(skip + ITEMS_PER_PAGE, totalProducts);
+
+  // (products, totalPages, startItem, endItem) are now handled above with the new logic
 
   return (
     <section className="py-2">
@@ -344,7 +354,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                     href={`/designers/${designer.id}`}
                     className="text-sm font-semibold text-purple-600 hover:text-purple-700"
                   >
-                    View profile →
+                    View collections →
                   </Link>
                 </div>
               </div>
