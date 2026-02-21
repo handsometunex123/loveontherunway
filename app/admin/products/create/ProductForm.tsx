@@ -68,8 +68,8 @@ export default function ProductForm({
   const [name, setName] = useState(initialProduct?.name ?? "");
   const [description, setDescription] = useState(initialProduct?.description ?? "");
   const [price, setPrice] = useState(initialProduct?.price ? String(initialProduct.price) : "");
-  const [category, setCategory] = useState<ProductCategory>(initialProduct?.category ?? "FEMALE");
-  const [isVisible, setIsVisible] = useState(initialProduct?.isVisible ?? false);
+  const [category, setCategory] = useState<ProductCategory>(initialProduct?.category ?? "MALE");
+  const [isVisible, setIsVisible] = useState(initialProduct?.isVisible ?? true);
   
   // Image state - now stores uploaded Cloudinary images
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>(

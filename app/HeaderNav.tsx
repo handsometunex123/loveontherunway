@@ -7,6 +7,7 @@ import UserNav from "./UserNav";
 import { useState } from "react";
 
 const NAV_ITEMS = [
+  { label: "Home", href: "/" },
   { label: "Designers", href: "/designers" },
   { label: "Cart", href: "/cart" },
   // { label: "Vote", href: "/vote" }

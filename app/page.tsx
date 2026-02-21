@@ -141,9 +141,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </div>
         <div className="grid auto-fit grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-5 mb-8">
           {products.map((product: any) => (
-            <div
+            <Link
               key={product.id}
-              className="rounded-2xl bg-white overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+              href={`/products/${product.id}`}
+              className="rounded-2xl bg-white overflow-hidden shadow-md hover:shadow-lg transition-shadow block focus:outline-none focus:ring-2 focus:ring-purple-500"
+              tabIndex={0}
+              style={{ textDecoration: 'none' }}
             >
               {product.images?.length ? (
                 <div className="w-full aspect-[4/5] bg-slate-50 flex items-center justify-center">
@@ -160,12 +163,23 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               )}
               <div className="p-5">
                 <h3 className="font-bold text-lg mb-1">{product.name}</h3>
-                <p className="text-slate-600 mb-4">{product.designer.brandName}</p>
-                <Link href={`/products/${product.id}`} className="text-purple-600 hover:text-purple-700 font-semibold">
-                  View details →
-                </Link>
+                <div className="flex items-center mb-4">
+                  {product.designer.brandLogo ? (
+                    <img
+                      src={product.designer.brandLogo}
+                      alt={`${product.designer.brandName} logo`}
+                      className="h-6 w-6 object-cover rounded-md border border-slate-200 mr-2"
+                    />
+                  ) : (
+                    <div className="h-6 w-6 rounded-md bg-slate-200 flex items-center justify-center text-slate-700 font-bold mr-2 text-xs">
+                      {product.designer.brandName?.slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                  <span className="text-slate-600">{product.designer.brandName}</span>
+                </div>
+                <span className="text-purple-600 hover:text-purple-700 font-semibold">View details →</span>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
